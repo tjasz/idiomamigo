@@ -1,6 +1,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import App, { LanguageView, WordView } from './App';
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
+import { Provider } from 'react-redux';
+import { store } from './slice';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    // errorElement: <ErrorPage />,
+  },
+  {
+    path: "/language",
+    element: <LanguageView />,
+  },
+  {
+    path: "/word",
+    element: <WordView />,
+  },
+]);
+
+ReactDOM.render(<React.StrictMode>
+  <Provider store={store}>
+    <RouterProvider router={router} />
+  </Provider>
+</React.StrictMode>, document.getElementById('root'));

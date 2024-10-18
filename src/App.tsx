@@ -4,15 +4,13 @@ import { Provider } from 'react-redux';
 import { store } from './slice';
 
 function App() {
-  return <Provider store={store}>
-    <div>
-      <LanguageView />
-      <WordView />
-    </div>
-  </Provider>;
+  return <div>
+    <LanguageView />
+    <WordView />
+  </div>
 }
 
-function LanguageView() {
+export function LanguageView() {
   const { data, error, isLoading } = useListLanguagesQuery();
   const languages = data?.value;
 
@@ -26,7 +24,7 @@ function LanguageView() {
   </div>
 }
 
-function WordView() {
+export function WordView() {
   const { data, error, isLoading } = useListWordsQuery();
   const [createWord, { isLoading: isCreating }] = useCreateWordMutation();
   const [updateWord, { isLoading: isUpdating }] = useUpdateWordMutation();
