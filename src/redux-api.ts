@@ -31,8 +31,9 @@ export const api = createApi({
         ]
         : [{ type: 'Word', id: 'LIST' }],
     }),
-    getWord: builder.query<Response<Word[]>, number>({
+    getWord: builder.query<Response<Word>, number>({
       query: (id) => `Word/Id/${id}`,
+      providesTags: word => word ? [{ type: 'Word', id: word.value.Id }] : []
     }),
     createWord: builder.mutation<Word, Omit<Word, 'Id'>>({
       query: (word) => ({
@@ -40,7 +41,22 @@ export const api = createApi({
         method: 'POST',
         body: word,
       }),
-      invalidatesTags: [{ type: 'Word', id: 'LIST' }]
+      invalidatesTags: [{ type: 'Word', id: 'LIST' }],
+    }),
+    updateWord: builder.mutation<Word, Word>({
+      query: ({ Id, ...patch }) => ({
+        url: `Word/Id/${Id}`,
+        method: 'PUT',
+        body: patch,
+      }),
+      invalidatesTags: (result, error, word) => [{ type: 'Word', id: word.Id }],
+    }),
+    deleteWord: builder.mutation<Word, number>({
+      query: (id) => ({
+        url: `Word/Id/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (result, error, id) => [{ type: 'Word', id }],
     }),
   }),
 });
@@ -51,4 +67,6 @@ export const {
   useListWordsQuery,
   useGetWordQuery,
   useCreateWordMutation,
+  useUpdateWordMutation,
+  useDeleteWordMutation,
 } = api;
