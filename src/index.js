@@ -1,38 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App, { LanguageView, WordView, PhraseView } from './App';
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
-import { Provider } from 'react-redux';
-import { store } from './slice';
+import App from './App'
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
-    // errorElement: <ErrorPage />,
-    children: [
-      {
-        path: "language",
-        element: <LanguageView />,
-      },
-      {
-        path: "word",
-        element: <WordView />,
-      },
-      {
-        path: "phrase",
-        element: <PhraseView />,
-      },
-    ],
-  },
-]);
-
-ReactDOM.render(<React.StrictMode>
-  <Provider store={store}>
-    <RouterProvider router={router} />
-  </Provider>
-</React.StrictMode>, document.getElementById('root'));
+ReactDOM.render(<App />, document.getElementById('root'));

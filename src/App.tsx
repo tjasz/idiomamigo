@@ -1,30 +1,16 @@
 import React from 'react';
 import { useCreatePhraseMutation, useCreateWordMutation, useDeletePhraseMutation, useDeleteWordMutation, useListLanguagesWithWordsQuery, useListPhrasesQuery, useListWordsQuery, useUpdatePhraseMutation, useUpdateWordMutation } from './redux-api';
-import { Box, Drawer, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
-import { Link, Outlet } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { store } from './slice';
+import { router } from './router';
 
 function App() {
-  const drawerWidth = 150;
-  return <div>
-    <Drawer open={true} variant="persistent">
-      <Box sx={{ width: drawerWidth }} role="presentation">
-        <List>
-          {['Language', 'Word', 'Phrase'].map((text) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton>
-                <ListItemText>
-                  <Link to={text}>{text}</Link>
-                </ListItemText>
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Box>
-    </Drawer>
-    <div style={{ marginLeft: drawerWidth }}>
-      <Outlet />
-    </div>
-  </div>
+  return <React.StrictMode>
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
+  </React.StrictMode>
 }
 
 export function LanguageView() {
