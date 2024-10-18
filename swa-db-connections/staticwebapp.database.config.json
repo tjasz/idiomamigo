@@ -52,6 +52,17 @@
           "role": "anonymous"
         }
       ]
+    },
+    "Word": {
+      "source": "dbo.Word",
+      "permissions": [
+        {
+          "actions": [
+            "*"
+          ],
+          "role": "anonymous"
+        }
+      ]
     }
   }
 }

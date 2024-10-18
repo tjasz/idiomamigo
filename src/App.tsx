@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useListLanguagesQuery } from './redux-api';
+import { useCreateWordMutation, useListLanguagesQuery, useListWordsQuery } from './redux-api';
 import { Provider } from 'react-redux';
 import { store } from './slice';
 
@@ -66,6 +66,7 @@ function App() {
   return <Provider store={store}>
     <div>
       <LanguageView />
+      <WordView />
       <h1>Static Web Apps Database Connections</h1>
       <blockquote>
         Open the console in the browser developer tools to see the API responses.
@@ -85,15 +86,47 @@ function App() {
 }
 
 function LanguageView() {
-  const { data: languages, error, isLoading } = useListLanguagesQuery();
-
-  // languages.map(lang => <li>{lang.Name}</li>)
+  const { data, error, isLoading } = useListLanguagesQuery();
+  const languages = data?.value;
 
   return <div>
     <h1>Languages</h1>
     <ul>
-      {JSON.stringify(languages)}
+      {languages && languages.map(lang => <li>{lang.Name}</li>)}
     </ul>
+  </div>
+}
+
+function WordView() {
+  const { data, error, isLoading } = useListWordsQuery();
+  const [createWord, { isLoading: isCreating }] = useCreateWordMutation();
+  const words = data?.value;
+
+  return <div>
+    <h1>Words</h1>
+    <table>
+      <tbody>
+        <tr>
+          <th>Id</th>
+          <th>Language</th>
+          <th>Spelling</th>
+          <th>Creation</th>
+        </tr>
+        {words && words.map(word => <tr key={word.Id}>
+          <td>{word.Id}</td>
+          <td>{word.Language}</td>
+          <td>{word.Spelling}</td>
+          <td>{word.Creation.toLocaleString()}</td>
+        </tr>)}
+      </tbody>
+    </table>
+    <button onClick={() => {
+      createWord({
+        Language: "English",
+        Spelling: "This",
+        Creation: new Date(),
+      })
+    }}>Add</button>
   </div>
 }
 
