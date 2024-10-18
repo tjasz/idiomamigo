@@ -25,7 +25,8 @@
     "prestart": "npm run build",
     "start": "swa start ./build --data-api-location swa-db-connections",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "npx eslint ."
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -41,5 +42,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.12.0",
+    "@types/eslint__js": "^8.42.3",
+    "eslint": "^8.57.1",
+    "typescript-eslint": "^8.10.0"
   }
 }

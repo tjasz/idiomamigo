@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { Language, Word } from './types';
 
-type Response<T> = {
+interface Response<T> {
   value: T;
 }
 

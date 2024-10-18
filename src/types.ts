@@ -1,8 +1,8 @@
-type Language = {
+export interface Language {
   Name: string;
 }
 
-type Word = {
+export interface Word {
   Id: number;
   Language: string;
   Spelling: string;
