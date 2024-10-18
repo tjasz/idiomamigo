@@ -1,16 +1,16 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 
 function App() {
-  const list = async () => {
-    const endpoint = '/data-api/rest/Person';
+  const list = async (table: string) => {
+    const endpoint = `/data-api/rest/${table}`;
     const response = await fetch(endpoint);
     const data = await response.json();
     console.table(data.value);
   };
 
-  const get = async () => {
+  const get = async (table: string) => {
     const id = 1;
-    const endpoint = `/data-api/rest/Person/Id`;
+    const endpoint = `/data-api/rest/${table}/Id`;
     const response = await fetch(`${endpoint}/${id}`);
     const result = await response.json();
     console.table(result.value);
@@ -66,11 +66,14 @@ function App() {
       Open the console in the browser developer tools to see the API responses.
     </blockquote>
     <div>
-      <button id="list" onClick={list}>List</button>
-      <button id="get" onClick={get}>Get</button>
+      <button id="list" onClick={() => list("Person")}>List</button>
+      <button id="get" onClick={() => list("Person")}>Get</button>
       <button id="update" onClick={update}>Update</button>
       <button id="create" onClick={create}>Create</button>
       <button id="delete" onClick={del}>Delete</button>
+    </div>
+    <div>
+      <button id="list" onClick={() => list("Language")}>List</button>
     </div>
   </div>;
 }

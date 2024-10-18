@@ -41,6 +41,17 @@
           "role": "anonymous"
         }
       ]
+    },
+    "Language": {
+      "source": "dbo.Language",
+      "permissions": [
+        {
+          "actions": [
+            "*"
+          ],
+          "role": "anonymous"
+        }
+      ]
     }
   }
 }
