@@ -19,7 +19,7 @@ export interface PhraseMembership {
 export interface PhraseMembershipTranslation {
   Id: number;
   PhraseMembership: number;
-  Word: number;
+  Word: number; // TODO should be a WordTranslation instead?
   Creation: Date;
 }
 

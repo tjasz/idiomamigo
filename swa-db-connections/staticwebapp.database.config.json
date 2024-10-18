@@ -66,6 +66,69 @@
     },
     "Phrase": {
       "source": "dbo.Phrase",
+      "relationships": {
+        "phrase_language": {
+          "cardinality": "one",
+          "target.entity": "Language",
+          "source.fields": [
+            "Language"
+          ],
+          "target.fields": [
+            "Name"
+          ]
+        },
+        "phrase_tags": {
+          "cardinality": "many",
+          "target.entity": "Tag",
+          "source.fields": [
+            "Id"
+          ],
+          "target.fields": [
+            "Name"
+          ],
+          "linking.object": "dbo.TagPhraseRelation",
+          "linking.source.fields": [
+            "Phrase"
+          ],
+          "linking.target.fields": [
+            "Tag"
+          ]
+        },
+        "phrase_translations": {
+          "cardinality": "many",
+          "target.entity": "Phrase",
+          "source.fields": [
+            "Id"
+          ],
+          "target.fields": [
+            "Id"
+          ],
+          "linking.object": "dbo.PhraseTranslation",
+          "linking.source.fields": [
+            "Source"
+          ],
+          "linking.target.fields": [
+            "Target"
+          ]
+        },
+        "phrase_words": {
+          "cardinality": "many",
+          "target.entity": "Word",
+          "source.fields": [
+            "Id"
+          ],
+          "target.fields": [
+            "Id"
+          ],
+          "linking.object": "dbo.PhraseMembership",
+          "linking.source.fields": [
+            "Phrase"
+          ],
+          "linking.target.fields": [
+            "Word"
+          ]
+        }
+      },
       "permissions": [
         {
           "actions": [
@@ -110,6 +173,42 @@
     },
     "Tag": {
       "source": "dbo.Tag",
+      "relationships": {
+        "tag_phrases": {
+          "cardinality": "many",
+          "target.entity": "Phrase",
+          "source.fields": [
+            "Name"
+          ],
+          "target.fields": [
+            "Id"
+          ],
+          "linking.object": "dbo.TagPhraseRelation",
+          "linking.source.fields": [
+            "Tag"
+          ],
+          "linking.target.fields": [
+            "Phrase"
+          ]
+        },
+        "tag_words": {
+          "cardinality": "many",
+          "target.entity": "Word",
+          "source.fields": [
+            "Name"
+          ],
+          "target.fields": [
+            "Id"
+          ],
+          "linking.object": "dbo.TagWordRelation",
+          "linking.source.fields": [
+            "Tag"
+          ],
+          "linking.target.fields": [
+            "Word"
+          ]
+        }
+      },
       "permissions": [
         {
           "actions": [
@@ -143,6 +242,69 @@
     },
     "Word": {
       "source": "dbo.Word",
+      "relationships": {
+        "word_language": {
+          "cardinality": "one",
+          "target.entity": "Language",
+          "source.fields": [
+            "Language"
+          ],
+          "target.fields": [
+            "Name"
+          ]
+        },
+        "word_tags": {
+          "cardinality": "many",
+          "target.entity": "Tag",
+          "source.fields": [
+            "Id"
+          ],
+          "target.fields": [
+            "Name"
+          ],
+          "linking.object": "dbo.TagWordRelation",
+          "linking.source.fields": [
+            "Word"
+          ],
+          "linking.target.fields": [
+            "Tag"
+          ]
+        },
+        "word_translations": {
+          "cardinality": "many",
+          "target.entity": "Word",
+          "source.fields": [
+            "Id"
+          ],
+          "target.fields": [
+            "Id"
+          ],
+          "linking.object": "dbo.WordTranslation",
+          "linking.source.fields": [
+            "Source"
+          ],
+          "linking.target.fields": [
+            "Target"
+          ]
+        },
+        "word_phrases": {
+          "cardinality": "many",
+          "target.entity": "Phrase",
+          "source.fields": [
+            "Id"
+          ],
+          "target.fields": [
+            "Id"
+          ],
+          "linking.object": "dbo.PhraseMembership",
+          "linking.source.fields": [
+            "Word"
+          ],
+          "linking.target.fields": [
+            "Phrase"
+          ]
+        }
+      },
       "permissions": [
         {
           "actions": [
