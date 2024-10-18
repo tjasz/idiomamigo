@@ -18,6 +18,8 @@ function LanguageView() {
 
   return <div>
     <h1>Languages</h1>
+    {isLoading && "..."}
+    {error && <span style={{ color: "red" }}>{JSON.stringify(error)}</span>}
     <ul>
       {languages && languages.map(lang => <li>{lang.Name}</li>)}
     </ul>
