@@ -1,4 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useListLanguagesQuery } from './redux-api';
+import { Provider } from 'react-redux';
+import { store } from './slice';
 
 function App() {
   const list = async (table: string) => {
@@ -60,60 +63,36 @@ function App() {
     }
   };
 
-  return <div>
-    <LanguageView />
-    <h1>Static Web Apps Database Connections</h1>
-    <blockquote>
-      Open the console in the browser developer tools to see the API responses.
-    </blockquote>
+  return <Provider store={store}>
     <div>
-      <button id="list" onClick={() => list("Person")}>List</button>
-      <button id="get" onClick={() => list("Person")}>Get</button>
-      <button id="update" onClick={update}>Update</button>
-      <button id="create" onClick={create}>Create</button>
-      <button id="delete" onClick={del}>Delete</button>
+      <LanguageView />
+      <h1>Static Web Apps Database Connections</h1>
+      <blockquote>
+        Open the console in the browser developer tools to see the API responses.
+      </blockquote>
+      <div>
+        <button id="list" onClick={() => list("Person")}>List</button>
+        <button id="get" onClick={() => list("Person")}>Get</button>
+        <button id="update" onClick={update}>Update</button>
+        <button id="create" onClick={create}>Create</button>
+        <button id="delete" onClick={del}>Delete</button>
+      </div>
+      <div>
+        <button id="list" onClick={() => list("Language")}>List</button>
+      </div>
     </div>
-    <div>
-      <button id="list" onClick={() => list("Language")}>List</button>
-    </div>
-  </div>;
-}
-
-type Language = {
-  Name: string;
+  </Provider>;
 }
 
 function LanguageView() {
-  const [languages, setLanguages] = useState<Language[] | null>(null);
-  const endpoint = `/data-api/rest/Language`;
+  const { data: languages, error, isLoading } = useListLanguagesQuery();
 
-  useEffect(() => {
-    fetch(endpoint)
-      .then(response => response.json())
-      .then(data => setLanguages(data.value))
-  }, []);
-
-  const create = async (newLang: string) => {
-    const data: Language = {
-      Name: newLang
-    };
-
-    const endpoint = `/data-api/rest/Language/`;
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    const result = await response.json();
-    console.table(result.value);
-  };
-
+  // languages.map(lang => <li>{lang.Name}</li>)
 
   return <div>
     <h1>Languages</h1>
     <ul>
-      {languages && languages.map(lang => <li>{lang.Name}</li>)}
-      <li><button onClick={() => create("Swahili")}>Create</button></li>
+      {JSON.stringify(languages)}
     </ul>
   </div>
 }
