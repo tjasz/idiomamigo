@@ -14,14 +14,16 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     // errorElement: <ErrorPage />,
-  },
-  {
-    path: "/language",
-    element: <LanguageView />,
-  },
-  {
-    path: "/word",
-    element: <WordView />,
+    children: [
+      {
+        path: "language",
+        element: <LanguageView />,
+      },
+      {
+        path: "word",
+        element: <WordView />,
+      },
+    ],
   },
 ]);
 
