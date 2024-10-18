@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Language, Word } from './types';
+import { Language, Phrase, Word } from './types';
 
 interface Response<T> {
   value: T;
@@ -8,7 +8,7 @@ interface Response<T> {
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({ baseUrl: '/data-api/rest' }),
-  tagTypes: ['Language', 'Word'],
+  tagTypes: ['Language', 'Word', 'Phrase'],
   endpoints: (builder) => ({
     listLanguages: builder.query<Response<Language[]>, void>({
       query: () => `Language`,
@@ -59,6 +59,42 @@ export const api = createApi({
       }),
       invalidatesTags: (result, error, id) => [{ type: 'Word', id }],
     }),
+    listPhrases: builder.query<Response<Phrase[]>, void>({
+      query: () => `Phrase`,
+      providesTags: (result) => result
+        ? [
+          ...result.value.map<{ type: 'Phrase', id: number }>(phrase => ({ type: 'Phrase', id: phrase.Id })),
+          { type: 'Phrase', id: 'LIST' }
+        ]
+        : [{ type: 'Phrase', id: 'LIST' }],
+    }),
+    getPhrase: builder.query<Response<Phrase>, number>({
+      query: (id) => `Phrase/Id/${id}`,
+      providesTags: phrase => phrase ? [{ type: 'Phrase', id: phrase.value.Id }] : []
+    }),
+    createPhrase: builder.mutation<Phrase, Omit<Phrase, 'Id'>>({
+      query: (phrase) => ({
+        url: `Phrase`,
+        method: 'POST',
+        body: phrase,
+      }),
+      invalidatesTags: [{ type: 'Phrase', id: 'LIST' }],
+    }),
+    updatePhrase: builder.mutation<Phrase, Phrase>({
+      query: ({ Id, ...patch }) => ({
+        url: `Phrase/Id/${Id}`,
+        method: 'PUT',
+        body: patch,
+      }),
+      invalidatesTags: (result, error, phrase) => [{ type: 'Phrase', id: phrase.Id }],
+    }),
+    deletePhrase: builder.mutation<Phrase, number>({
+      query: (id) => ({
+        url: `Phrase/Id/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (result, error, id) => [{ type: 'Phrase', id }],
+    }),
   }),
 });
 
@@ -70,4 +106,9 @@ export const {
   useCreateWordMutation,
   useUpdateWordMutation,
   useDeleteWordMutation,
+  useListPhrasesQuery,
+  useGetPhraseQuery,
+  useCreatePhraseMutation,
+  useUpdatePhraseMutation,
+  useDeletePhraseMutation,
 } = api;

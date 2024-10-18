@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCreateWordMutation, useDeleteWordMutation, useListLanguagesQuery, useListWordsQuery, useUpdateWordMutation } from './redux-api';
+import { useCreatePhraseMutation, useCreateWordMutation, useDeletePhraseMutation, useDeleteWordMutation, useListLanguagesQuery, useListPhrasesQuery, useListWordsQuery, useUpdatePhraseMutation, useUpdateWordMutation } from './redux-api';
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import { Link, Outlet } from 'react-router-dom';
 
@@ -9,7 +9,7 @@ function App() {
     <Drawer open={true} variant="persistent">
       <Box sx={{ width: drawerWidth }} role="presentation">
         <List>
-          {['Language', 'Word'].map((text) => (
+          {['Language', 'Word', 'Phrase'].map((text) => (
             <ListItem key={text} disablePadding>
               <ListItemButton>
                 <ListItemText>
@@ -95,6 +95,52 @@ export function WordView() {
     </table>
     <button onClick={() => {
       createWord({
+        Language: "English",
+        Spelling: "This",
+        Creation: new Date(),
+      })
+    }}>Add</button>
+  </div>
+}
+
+export function PhraseView() {
+  const { data, error, isLoading } = useListPhrasesQuery();
+  const [createPhrase, { isLoading: isCreating }] = useCreatePhraseMutation();
+  const [updatePhrase, { isLoading: isUpdating }] = useUpdatePhraseMutation();
+  const [deletePhrase, { isLoading: isDeleting }] = useDeletePhraseMutation();
+  const phrases = data?.value;
+
+  return <div>
+    <h1>Phrases</h1>
+    <table>
+      <tbody>
+        <tr>
+          <th>Id</th>
+          <th>Language</th>
+          <th>Spelling</th>
+          <th>Creation</th>
+          <th></th>
+          <th></th>
+        </tr>
+        {(isLoading || isCreating || isUpdating || isDeleting) && "..."}
+        {error && <span style={{ color: "red" }}>{JSON.stringify(error)}</span>}
+        {phrases && phrases.map(phrase => <tr key={phrase.Id}>
+          <td>{phrase.Id}</td>
+          <td>{phrase.Language}</td>
+          <td>{phrase.Spelling}</td>
+          <td>{phrase.Creation.toLocaleString()}</td>
+          <td><button onClick={() => updatePhrase({
+            Id: phrase.Id,
+            Language: "English",
+            Spelling: "That",
+            Creation: new Date(),
+          })}>Update</button></td>
+          <td><button onClick={() => deletePhrase(phrase.Id)}>Delete</button></td>
+        </tr>)}
+      </tbody>
+    </table>
+    <button onClick={() => {
+      createPhrase({
         Language: "English",
         Spelling: "This",
         Creation: new Date(),

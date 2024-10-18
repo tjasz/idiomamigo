@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App, { LanguageView, WordView } from './App';
+import App, { LanguageView, WordView, PhraseView } from './App';
 import {
   createBrowserRouter,
   RouterProvider,
@@ -22,6 +22,10 @@ const router = createBrowserRouter([
       {
         path: "word",
         element: <WordView />,
+      },
+      {
+        path: "phrase",
+        element: <PhraseView />,
       },
     ],
   },

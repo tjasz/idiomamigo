@@ -64,6 +64,17 @@
           "role": "anonymous"
         }
       ]
+    },
+    "Phrase": {
+      "source": "dbo.Phrase",
+      "permissions": [
+        {
+          "actions": [
+            "*"
+          ],
+          "role": "anonymous"
+        }
+      ]
     }
   }
 }

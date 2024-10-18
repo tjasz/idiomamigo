@@ -8,3 +8,10 @@ export interface Word {
   Spelling: string;
   Creation: Date;
 }
+
+export interface Phrase {
+  Id: number;
+  Language: string;
+  Spelling: string;
+  Creation: Date;
+}
