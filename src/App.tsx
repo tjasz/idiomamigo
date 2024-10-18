@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 function App() {
   const list = async (table: string) => {
@@ -61,6 +61,7 @@ function App() {
   };
 
   return <div>
+    <LanguageView />
     <h1>Static Web Apps Database Connections</h1>
     <blockquote>
       Open the console in the browser developer tools to see the API responses.
@@ -76,6 +77,45 @@ function App() {
       <button id="list" onClick={() => list("Language")}>List</button>
     </div>
   </div>;
+}
+
+type Language = {
+  Name: string;
+}
+
+function LanguageView() {
+  const [languages, setLanguages] = useState<Language[] | null>(null);
+  const endpoint = `/data-api/rest/Language`;
+
+  useEffect(() => {
+    fetch(endpoint)
+      .then(response => response.json())
+      .then(data => setLanguages(data.value))
+  }, []);
+
+  const create = async (newLang: string) => {
+    const data: Language = {
+      Name: newLang
+    };
+
+    const endpoint = `/data-api/rest/Language/`;
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    const result = await response.json();
+    console.table(result.value);
+  };
+
+
+  return <div>
+    <h1>Languages</h1>
+    <ul>
+      {languages && languages.map(lang => <li>{lang.Name}</li>)}
+      <li><button onClick={() => create("Swahili")}>Create</button></li>
+    </ul>
+  </div>
 }
 
 export default App;
