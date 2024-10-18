@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCreatePhraseMutation, useCreateWordMutation, useDeletePhraseMutation, useDeleteWordMutation, useListLanguagesQuery, useListPhrasesQuery, useListWordsQuery, useUpdatePhraseMutation, useUpdateWordMutation } from './redux-api';
+import { useCreatePhraseMutation, useCreateWordMutation, useDeletePhraseMutation, useDeleteWordMutation, useListLanguagesWithWordsQuery, useListPhrasesQuery, useListWordsQuery, useUpdatePhraseMutation, useUpdateWordMutation } from './redux-api';
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import { Link, Outlet } from 'react-router-dom';
 
@@ -28,31 +28,19 @@ function App() {
 }
 
 export function LanguageView() {
-  const { data, error, isLoading } = useListLanguagesQuery();
-  const languages = data?.value;
-
-  const getWords = async (language: string) => {
-    const query = `{
-languages {
-  items {
-    Name
-  }
-}
-}`;
-    fetch(`/data-api/graphql`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query })
-    }).then(response => response.json())
-      .then(json => console.log(json.value));
-  }
+  const { data, error, isLoading } = useListLanguagesWithWordsQuery();
 
   return <div>
     <h1>Languages</h1>
     {isLoading && "..."}
     {error && <span style={{ color: "red" }}>{JSON.stringify(error)}</span>}
     <ul>
-      {languages && languages.map(lang => <li>{lang.Name} <button onClick={() => getWords(lang.Name)}>Get Words</button></li>)}
+      {data && data.map(lang => <li>
+        {lang.Name}
+        <ul>
+          {lang.Words.map(word => <li>{word.Spelling}</li>)}
+        </ul>
+      </li>)}
     </ul>
   </div>
 }
