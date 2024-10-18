@@ -64,6 +64,83 @@
         }
       ]
     },
+    "Phrase": {
+      "source": "dbo.Phrase",
+      "permissions": [
+        {
+          "actions": [
+            "*"
+          ],
+          "role": "anonymous"
+        }
+      ]
+    },
+    "PhraseMembership": {
+      "source": "dbo.PhraseMembership",
+      "permissions": [
+        {
+          "actions": [
+            "*"
+          ],
+          "role": "anonymous"
+        }
+      ]
+    },
+    "PhraseMembershipTranslation": {
+      "source": "dbo.PhraseMembershipTranslation",
+      "permissions": [
+        {
+          "actions": [
+            "*"
+          ],
+          "role": "anonymous"
+        }
+      ]
+    },
+    "PhraseTranslation": {
+      "source": "dbo.PhraseTranslation",
+      "permissions": [
+        {
+          "actions": [
+            "*"
+          ],
+          "role": "anonymous"
+        }
+      ]
+    },
+    "Tag": {
+      "source": "dbo.Tag",
+      "permissions": [
+        {
+          "actions": [
+            "*"
+          ],
+          "role": "anonymous"
+        }
+      ]
+    },
+    "TagWordRelation": {
+      "source": "dbo.TagWordRelation",
+      "permissions": [
+        {
+          "actions": [
+            "*"
+          ],
+          "role": "anonymous"
+        }
+      ]
+    },
+    "TagPhraseRelation": {
+      "source": "dbo.TagPhraseRelation",
+      "permissions": [
+        {
+          "actions": [
+            "*"
+          ],
+          "role": "anonymous"
+        }
+      ]
+    },
     "Word": {
       "source": "dbo.Word",
       "permissions": [
@@ -75,8 +152,8 @@
         }
       ]
     },
-    "Phrase": {
-      "source": "dbo.Phrase",
+    "WordTranslation": {
+      "source": "dbo.WordTranslation",
       "permissions": [
         {
           "actions": [
