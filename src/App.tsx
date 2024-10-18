@@ -31,12 +31,28 @@ export function LanguageView() {
   const { data, error, isLoading } = useListLanguagesQuery();
   const languages = data?.value;
 
+  const getWords = async (language: string) => {
+    const query = `{
+languages {
+  items {
+    Name
+  }
+}
+}`;
+    fetch(`/data-api/graphql`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query })
+    }).then(response => response.json())
+      .then(json => console.log(json.value));
+  }
+
   return <div>
     <h1>Languages</h1>
     {isLoading && "..."}
     {error && <span style={{ color: "red" }}>{JSON.stringify(error)}</span>}
     <ul>
-      {languages && languages.map(lang => <li>{lang.Name}</li>)}
+      {languages && languages.map(lang => <li>{lang.Name} <button onClick={() => getWords(lang.Name)}>Get Words</button></li>)}
     </ul>
   </div>
 }

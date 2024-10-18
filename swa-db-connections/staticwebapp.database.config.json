@@ -31,19 +31,20 @@
     }
   },
   "entities": {
-    "Person": {
-      "source": "dbo.MyTestPersonTable",
-      "permissions": [
-        {
-          "actions": [
-            "*"
-          ],
-          "role": "anonymous"
-        }
-      ]
-    },
     "Language": {
       "source": "dbo.Language",
+      "relationships": {
+        "language_words": {
+          "cardinality": "many",
+          "target.entity": "Word",
+          "source.fields": [
+            "Name"
+          ],
+          "target.fields": [
+            "Language"
+          ]
+        }
+      },
       "permissions": [
         {
           "actions": [
