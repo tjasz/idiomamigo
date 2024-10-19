@@ -40,7 +40,7 @@ export const api = createApi({
       query: (name) => `rest/Language/Name/${name}`,
       providesTags: (lang) => lang ? [{ type: 'Language', id: lang.value.Name }] : []
     }),
-    getLanguageWithWords: builder.query<Language, string>({
+    getLanguageWithWords: builder.query<Language & { Words: Word[] }, string>({
       query: (name) => ({
         url: 'graphql',
         method: 'POST',

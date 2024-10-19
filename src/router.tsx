@@ -7,6 +7,7 @@ import Root from './routes/Root';
 import { LanguagesView } from './routes/LanguagesView';
 import { WordsView } from './routes/WordsView';
 import { PhrasesView } from './routes/PhrasesView';
+import { LanguageView } from './routes/LanguageView';
 
 export const router = createBrowserRouter([
   {
@@ -17,6 +18,10 @@ export const router = createBrowserRouter([
       {
         path: "languages",
         element: <LanguagesView />,
+      },
+      {
+        path: "languages/:Name",
+        element: <LanguageView />,
       },
       {
         path: "words",
