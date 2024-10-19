@@ -6,7 +6,6 @@ export function WordsView() {
   const [createWord, { isLoading: isCreating }] = useCreateWordMutation();
   const [updateWord, { isLoading: isUpdating }] = useUpdateWordMutation();
   const [deleteWord, { isLoading: isDeleting }] = useDeleteWordMutation();
-  const words = data?.value;
 
   return <div>
     <h1>Words</h1>
@@ -22,7 +21,7 @@ export function WordsView() {
         </tr>
         {(isLoading || isCreating || isUpdating || isDeleting) && "..."}
         {error && <span style={{ color: "red" }}>{JSON.stringify(error)}</span>}
-        {words && words.map(word => <tr key={word.Id}>
+        {data && data.map(word => <tr key={word.Id}>
           <td>{word.Id}</td>
           <td>{word.Language}</td>
           <td>{word.Spelling}</td>

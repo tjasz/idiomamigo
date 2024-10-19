@@ -6,7 +6,6 @@ export function PhrasesView() {
   const [createPhrase, { isLoading: isCreating }] = useCreatePhraseMutation();
   const [updatePhrase, { isLoading: isUpdating }] = useUpdatePhraseMutation();
   const [deletePhrase, { isLoading: isDeleting }] = useDeletePhraseMutation();
-  const phrases = data?.value;
 
   return <div>
     <h1>Phrases</h1>
@@ -22,7 +21,7 @@ export function PhrasesView() {
         </tr>
         {(isLoading || isCreating || isUpdating || isDeleting) && "..."}
         {error && <span style={{ color: "red" }}>{JSON.stringify(error)}</span>}
-        {phrases && phrases.map(phrase => <tr key={phrase.Id}>
+        {data && data.map(phrase => <tr key={phrase.Id}>
           <td>{phrase.Id}</td>
           <td>{phrase.Language}</td>
           <td>{phrase.Spelling}</td>

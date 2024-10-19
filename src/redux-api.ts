@@ -1,20 +1,17 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { Language, Phrase, Word } from './types';
 
-interface Response<T> {
-  value: T;
-}
-
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({ baseUrl: '/data-api' }),
   tagTypes: ['Language', 'Word', 'Phrase'],
   endpoints: (builder) => ({
-    listLanguages: builder.query<Response<Language[]>, void>({
+    listLanguages: builder.query<Language[], void>({
       query: () => `rest/Language`,
+      transformResponse: (response: { value: Language[] }) => response.value,
       providesTags: (result) => result
         ? [
-          ...result.value.map<{ type: 'Language', id: string }>(lang => ({ type: 'Language', id: lang.Name })),
+          ...result.map<{ type: 'Language', id: string }>(lang => ({ type: 'Language', id: lang.Name })),
           { type: 'Language', id: 'LIST' }
         ]
         : [{ type: 'Language', id: 'LIST' }],
@@ -36,9 +33,10 @@ export const api = createApi({
         ]
         : [{ type: 'Language', id: 'LIST' }],
     }),
-    getLanguage: builder.query<Response<Language>, string>({
+    getLanguage: builder.query<Language, string>({
       query: (name) => `rest/Language/Name/${name}`,
-      providesTags: (lang) => lang ? [{ type: 'Language', id: lang.value.Name }] : []
+      transformResponse: (response: { value: Language }) => response.value,
+      providesTags: (lang) => lang ? [{ type: 'Language', id: lang.Name }] : []
     }),
     getLanguageWithWords: builder.query<Language & { Words: Word[] }, string>({
       query: (name) => ({
@@ -53,18 +51,20 @@ export const api = createApi({
         }),
       providesTags: (lang) => lang ? [{ type: 'Language', id: lang.Name }] : []
     }),
-    listWords: builder.query<Response<Word[]>, void>({
+    listWords: builder.query<Word[], void>({
       query: () => `rest/Word`,
+      transformResponse: (response: { value: Word[] }) => response.value,
       providesTags: (result) => result
         ? [
-          ...result.value.map<{ type: 'Word', id: number }>(word => ({ type: 'Word', id: word.Id })),
+          ...result.map<{ type: 'Word', id: number }>(word => ({ type: 'Word', id: word.Id })),
           { type: 'Word', id: 'LIST' }
         ]
         : [{ type: 'Word', id: 'LIST' }],
     }),
-    getWord: builder.query<Response<Word>, number>({
+    getWord: builder.query<Word, number>({
       query: (id) => `rest/Word/Id/${id}`,
-      providesTags: word => word ? [{ type: 'Word', id: word.value.Id }] : []
+      transformResponse: (response: { value: Word }) => response.value,
+      providesTags: word => word ? [{ type: 'Word', id: word.Id }] : []
     }),
     createWord: builder.mutation<Word, Omit<Word, 'Id'>>({
       query: (word) => ({
@@ -89,18 +89,20 @@ export const api = createApi({
       }),
       invalidatesTags: (result, error, id) => [{ type: 'Word', id }],
     }),
-    listPhrases: builder.query<Response<Phrase[]>, void>({
+    listPhrases: builder.query<Phrase[], void>({
       query: () => `rest/Phrase`,
+      transformResponse: (response: { value: Phrase[] }) => response.value,
       providesTags: (result) => result
         ? [
-          ...result.value.map<{ type: 'Phrase', id: number }>(phrase => ({ type: 'Phrase', id: phrase.Id })),
+          ...result.map<{ type: 'Phrase', id: number }>(phrase => ({ type: 'Phrase', id: phrase.Id })),
           { type: 'Phrase', id: 'LIST' }
         ]
         : [{ type: 'Phrase', id: 'LIST' }],
     }),
-    getPhrase: builder.query<Response<Phrase>, number>({
+    getPhrase: builder.query<Phrase, number>({
       query: (id) => `rest/Phrase/Id/${id}`,
-      providesTags: phrase => phrase ? [{ type: 'Phrase', id: phrase.value.Id }] : []
+      transformResponse: (response: { value: Phrase }) => response.value,
+      providesTags: phrase => phrase ? [{ type: 'Phrase', id: phrase.Id }] : []
     }),
     createPhrase: builder.mutation<Phrase, Omit<Phrase, 'Id'>>({
       query: (phrase) => ({
