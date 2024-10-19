@@ -1,10 +1,12 @@
 
 import React from 'react';
-import { LanguageView, WordView, PhraseView } from './App';
 import {
   createBrowserRouter,
 } from "react-router-dom";
 import Root from './routes/Root';
+import { LanguagesView } from './routes/LanguagesView';
+import { WordsView } from './routes/WordsView';
+import { PhrasesView } from './routes/PhrasesView';
 
 export const router = createBrowserRouter([
   {
@@ -13,16 +15,16 @@ export const router = createBrowserRouter([
     // errorElement: <ErrorPage />,
     children: [
       {
-        path: "language",
-        element: <LanguageView />,
+        path: "languages",
+        element: <LanguagesView />,
       },
       {
-        path: "word",
-        element: <WordView />,
+        path: "words",
+        element: <WordsView />,
       },
       {
-        path: "phrase",
-        element: <PhraseView />,
+        path: "phrases",
+        element: <PhrasesView />,
       },
     ],
   },
