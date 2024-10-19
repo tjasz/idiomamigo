@@ -38,16 +38,17 @@ export const api = createApi({
       transformResponse: (response: { value: Language }) => response.value,
       providesTags: (lang) => lang ? [{ type: 'Language', id: lang.Name }] : []
     }),
-    getLanguageWithWords: builder.query<Language & { Words: Word[] }, string>({
+    getLanguageWithWordsAndPhrases: builder.query<Language & { Words: Word[], Phrases: Phrase[] }, string>({
       query: (name) => ({
         url: 'graphql',
         method: 'POST',
-        body: { query: `{ languages(filter: {Name: {eq: "${name}"}}) { items {Name language_words { items { Spelling }} } } }` },
+        body: { query: `{languages(filter:{Name:{eq:"${name}"}}){items{Name language_words{items{Id Spelling}} language_phrases{items{Id Spelling}}}}}` },
       }),
       transformResponse:
-        (response: { data: { languages: { items: (Language & { language_words: { items: Word[] } })[] } } }, meta, arg) => ({
+        (response: { data: { languages: { items: (Language & { language_words: { items: Word[] }, language_phrases: { items: Phrase[] } })[] } } }, meta, arg) => ({
           Name: response.data.languages.items[0].Name,
-          Words: response.data.languages.items[0].language_words.items
+          Words: response.data.languages.items[0].language_words.items,
+          Phrases: response.data.languages.items[0].language_phrases.items,
         }),
       providesTags: (lang) => lang ? [{ type: 'Language', id: lang.Name }] : []
     }),
@@ -134,7 +135,7 @@ export const {
   useListLanguagesQuery,
   useListLanguagesWithWordsQuery,
   useGetLanguageQuery,
-  useGetLanguageWithWordsQuery,
+  useGetLanguageWithWordsAndPhrasesQuery,
   useListWordsQuery,
   useGetWordQuery,
   useCreateWordMutation,
