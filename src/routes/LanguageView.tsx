@@ -6,7 +6,7 @@ export function LanguageView() {
   const params = useParams();
   console.log({ params });
   const { Name } = params;
-  const { data, error, isLoading } = useGetLanguageWithWordsQuery(Name!, { skip: Name == undefined });
+  const { data, error, isLoading } = useGetLanguageWithWordsQuery(Name!, { skip: Name === undefined });
 
   if (Name === undefined) {
     console.log("No Name parameter.")
@@ -19,6 +19,8 @@ export function LanguageView() {
 
   return <div>
     <h1>Language: '{data.Name}'</h1>
+    {isLoading && "..."}
+    {error && <span style={{ color: "red" }}>{JSON.stringify(error)}</span>}
     <ul>
       {data.Words.map(word => <li key={word.Spelling}>{word.Spelling}</li>)}
     </ul>
