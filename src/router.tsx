@@ -40,6 +40,14 @@ export const router = createBrowserRouter([
         path: "phrases/:Id",
         element: <span style={{ color: "red" }}>Not implemented!</span>,
       },
+      {
+        path: "tags",
+        element: <span style={{ color: "red" }}>Not implemented!</span>,
+      },
+      {
+        path: "tags/:Id",
+        element: <span style={{ color: "red" }}>Not implemented!</span>,
+      },
     ],
   },
 ]);

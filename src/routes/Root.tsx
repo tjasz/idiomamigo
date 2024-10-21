@@ -16,7 +16,7 @@ export default function Root() {
     <Drawer open={true} variant="persistent">
       <Box sx={{ width: drawerWidth }} role="presentation">
         <List>
-          {['Languages', 'Words', 'Phrases'].map((text) => (
+          {['Languages', 'Words', 'Phrases', 'Tags'].map((text) => (
             <ListItem key={text} disablePadding>
               <ListItemButton>
                 <ListItemText>

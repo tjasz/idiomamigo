@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Language, Phrase, Tag, Word } from './types';
+import { Language, Phrase, Tag, Word, WordTranslation } from './types';
 
 export const api = createApi({
   reducerPath: 'api',
@@ -84,6 +84,11 @@ export const api = createApi({
         }),
       providesTags: word => word ? [{ type: 'Word', id: word.Id }] : []
     }),
+    getTranslationsForWord: builder.query<WordTranslation[], number>({
+      query: (id) => `rest/WordTranslation?$filter=Source eq ${id}`,
+      transformResponse: (response: { value: WordTranslation[] }) => response.value,
+      providesTags: [] // TODO
+    }),
     createWord: builder.mutation<Word, Omit<Word, 'Id'>>({
       query: (word) => ({
         url: `rest/Word`,
@@ -156,6 +161,7 @@ export const {
   useListWordsQuery,
   useGetWordQuery,
   useGetWordWithPhrasesAndTagsQuery,
+  useGetTranslationsForWordQuery,
   useCreateWordMutation,
   useUpdateWordMutation,
   useDeleteWordMutation,
