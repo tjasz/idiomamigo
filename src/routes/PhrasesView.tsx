@@ -1,47 +1,27 @@
 import React from "react";
-import { useCreatePhraseMutation, useDeletePhraseMutation, useListPhrasesQuery, useUpdatePhraseMutation } from "../redux-api";
+import { useListPhrasesQuery } from "../redux-api";
+import { Link } from "react-router-dom";
 
 export function PhrasesView() {
   const { data, error, isLoading } = useListPhrasesQuery();
-  const [createPhrase, { isLoading: isCreating }] = useCreatePhraseMutation();
-  const [updatePhrase, { isLoading: isUpdating }] = useUpdatePhraseMutation();
-  const [deletePhrase, { isLoading: isDeleting }] = useDeletePhraseMutation();
 
   return <div>
     <h1>Phrases</h1>
     <table>
       <tbody>
         <tr>
-          <th>Id</th>
           <th>Language</th>
           <th>Spelling</th>
           <th>Creation</th>
-          <th></th>
-          <th></th>
         </tr>
-        {(isLoading || isCreating || isUpdating || isDeleting) && "..."}
+        {isLoading && "..."}
         {error && <span style={{ color: "red" }}>{JSON.stringify(error)}</span>}
         {data && data.map(phrase => <tr key={phrase.Id}>
-          <td>{phrase.Id}</td>
-          <td>{phrase.Language}</td>
-          <td>{phrase.Spelling}</td>
+          <td><Link to={`/Languages/${phrase.Language}`}>{phrase.Language}</Link></td>
+          <td><Link to={phrase.Id.toString()}>{phrase.Spelling}</Link></td>
           <td>{phrase.Creation.toLocaleString()}</td>
-          <td><button onClick={() => updatePhrase({
-            Id: phrase.Id,
-            Language: "English",
-            Spelling: "That",
-            Creation: new Date(),
-          })}>Update</button></td>
-          <td><button onClick={() => deletePhrase(phrase.Id)}>Delete</button></td>
         </tr>)}
       </tbody>
     </table>
-    <button onClick={() => {
-      createPhrase({
-        Language: "English",
-        Spelling: "This",
-        Creation: new Date(),
-      })
-    }}>Add</button>
   </div>
 }
