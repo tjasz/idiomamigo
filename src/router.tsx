@@ -9,6 +9,7 @@ import { WordsView } from './routes/WordsView';
 import { PhrasesView } from './routes/PhrasesView';
 import { LanguageView } from './routes/LanguageView';
 import { WordView } from './routes/WordView';
+import { PhraseView } from './routes/PhraseView';
 
 export const router = createBrowserRouter([
   {
@@ -38,7 +39,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "phrases/:Id",
-        element: <span style={{ color: "red" }}>Not implemented!</span>,
+        element: <PhraseView />,
       },
       {
         path: "tags",

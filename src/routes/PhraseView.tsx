@@ -1,19 +1,19 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
-import { useGetTranslationsForWordQuery, useGetWordWithPhrasesAndTagsQuery } from "../redux-api";
+import { useGetPhraseWithWordsAndTagsQuery, useGetTranslationsForPhraseQuery } from "../redux-api";
 
-export function WordView() {
+export function PhraseView() {
   const params = useParams();
   const { Id } = params;
   const IdAsInt = parseInt(Id ?? "0");
-  const { data, error, isLoading } = useGetWordWithPhrasesAndTagsQuery(IdAsInt, { skip: Id === undefined });
-  const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useGetTranslationsForWordQuery(IdAsInt, { skip: Id === undefined });
+  const { data, error, isLoading } = useGetPhraseWithWordsAndTagsQuery(IdAsInt, { skip: Id === undefined });
+  const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useGetTranslationsForPhraseQuery(IdAsInt, { skip: Id === undefined });
 
   return <div>
     {isLoading && "..."}
     {error && <span style={{ color: "red" }}>{JSON.stringify(error)}</span>}
     {data && <div>
-      <h1>Word: '{data.Spelling}' (<Link to={`/Languages/${data.Language}`}>{data.Language}</Link>)</h1>
+      <h1>Phrase: '{data.Spelling}' (<Link to={`/Languages/${data.Language}`}>{data.Language}</Link>)</h1>
       Created: {data.Creation.toLocaleString()}
       {!!translationsError
         ? <span style={{ color: "red" }}>{JSON.stringify(translationsError)}</span>
@@ -23,17 +23,17 @@ export function WordView() {
             <h2>Translations</h2>
             <ul>
               {translations!.map(translation => {
-                const otherWord = translation.Source === IdAsInt ? translation.Target : translation.Source;
+                const otherPhrase = translation.Source === IdAsInt ? translation.Target : translation.Source;
                 return <li key={translation.Id}>
-                  <Link to={`/Words/${otherWord}`}>{otherWord}</Link>
+                  <Link to={`/Phrases/${otherPhrase}`}>{otherPhrase}</Link>
                 </li>
               })}
             </ul>
           </div>
       }
-      <h2>Phrases:</h2>
+      <h2>Words:</h2>
       <ul>
-        {data.Phrases.map(phrase => <li key={phrase.Id}><Link to={`/Phrases/${phrase.Id}`}>{phrase.Spelling}</Link></li>)}
+        {data.Words.map(word => <li key={word.Id}><Link to={`/Phrases/${word.Id}`}>{word.Spelling}</Link></li>)}
       </ul>
       <h2>Tags:</h2>
       <ul>

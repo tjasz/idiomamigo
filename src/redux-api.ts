@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Language, Phrase, Tag, Word, WordTranslation } from './types';
+import { Language, Phrase, PhraseTranslation, Tag, Word, WordTranslation } from './types';
 
 export const api = createApi({
   reducerPath: 'api',
@@ -85,7 +85,7 @@ export const api = createApi({
       providesTags: word => word ? [{ type: 'Word', id: word.Id }] : []
     }),
     getTranslationsForWord: builder.query<WordTranslation[], number>({
-      query: (id) => `rest/WordTranslation?$filter=Source eq ${id}`,
+      query: (id) => `rest/WordTranslation?$filter=Source eq ${id} or Target eq ${id}`,
       transformResponse: (response: { value: WordTranslation[] }) => response.value,
       providesTags: [] // TODO
     }),
@@ -127,6 +127,28 @@ export const api = createApi({
       transformResponse: (response: { value: Phrase }) => response.value,
       providesTags: phrase => phrase ? [{ type: 'Phrase', id: phrase.Id }] : []
     }),
+    getPhraseWithWordsAndTags: builder.query<Phrase & { Words: Word[], Tags: Tag[] }, number>({
+      query: (id) => ({
+        url: 'graphql',
+        method: 'POST',
+        body: { query: `{phrases(filter:{Id:{eq:${id}}}) {items{Id Language Spelling Creation phrase_words{items{Id Spelling}} phrase_tags{items{Name}}}}}` },
+      }),
+      transformResponse:
+        (response: { data: { phrases: { items: (Phrase & { phrase_words: { items: Phrase[] }, phrase_tags: { items: Tag[] } })[] } } }, meta, arg) => ({
+          Id: response.data.phrases.items[0].Id,
+          Language: response.data.phrases.items[0].Language,
+          Spelling: response.data.phrases.items[0].Spelling,
+          Creation: response.data.phrases.items[0].Creation,
+          Words: response.data.phrases.items[0].phrase_words.items,
+          Tags: response.data.phrases.items[0].phrase_tags.items,
+        }),
+      providesTags: phrase => phrase ? [{ type: 'Phrase', id: phrase.Id }] : []
+    }),
+    getTranslationsForPhrase: builder.query<PhraseTranslation[], number>({
+      query: (id) => `rest/PhraseTranslation?$filter=Source eq ${id} or Target eq ${id}`,
+      transformResponse: (response: { value: PhraseTranslation[] }) => response.value,
+      providesTags: [] // TODO
+    }),
     createPhrase: builder.mutation<Phrase, Omit<Phrase, 'Id'>>({
       query: (phrase) => ({
         url: `rest/Phrase`,
@@ -167,6 +189,8 @@ export const {
   useDeleteWordMutation,
   useListPhrasesQuery,
   useGetPhraseQuery,
+  useGetPhraseWithWordsAndTagsQuery,
+  useGetTranslationsForPhraseQuery,
   useCreatePhraseMutation,
   useUpdatePhraseMutation,
   useDeletePhraseMutation,
