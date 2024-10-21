@@ -10,7 +10,6 @@ export function WordsView() {
     <table>
       <tbody>
         <tr>
-          <th>Id</th>
           <th>Language</th>
           <th>Spelling</th>
           <th>Creation</th>
@@ -18,9 +17,8 @@ export function WordsView() {
         {isLoading && "..."}
         {error && <span style={{ color: "red" }}>{JSON.stringify(error)}</span>}
         {data && data.map(word => <tr key={word.Id}>
-          <td><Link to={word.Id.toString()}>{word.Id}</Link></td>
           <td><Link to={`/Languages/${word.Language}`}>{word.Language}</Link></td>
-          <td>{word.Spelling}</td>
+          <td><Link to={word.Id.toString()}>{word.Spelling}</Link></td>
           <td>{word.Creation.toLocaleString()}</td>
         </tr>)}
       </tbody>
