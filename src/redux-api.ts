@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Language, Phrase, Word } from './types';
+import { Language, Phrase, Tag, Word } from './types';
 
 export const api = createApi({
   reducerPath: 'api',
@@ -65,6 +65,23 @@ export const api = createApi({
     getWord: builder.query<Word, number>({
       query: (id) => `rest/Word/Id/${id}`,
       transformResponse: (response: { value: Word }) => response.value,
+      providesTags: word => word ? [{ type: 'Word', id: word.Id }] : []
+    }),
+    getWordWithPhrasesAndTags: builder.query<Word & { Phrases: Phrase[], Tags: Tag[] }, number>({
+      query: (id) => ({
+        url: 'graphql',
+        method: 'POST',
+        body: { query: `{words(filter:{Id:{eq:${id}}}) {items{Id Language Spelling Creation word_phrases{items{Id Spelling}} word_tags{items{Name}}}}}` },
+      }),
+      transformResponse:
+        (response: { data: { words: { items: (Word & { word_phrases: { items: Phrase[] }, word_tags: { items: Tag[] } })[] } } }, meta, arg) => ({
+          Id: response.data.words.items[0].Id,
+          Language: response.data.words.items[0].Language,
+          Spelling: response.data.words.items[0].Spelling,
+          Creation: response.data.words.items[0].Creation,
+          Phrases: response.data.words.items[0].word_phrases.items,
+          Tags: response.data.words.items[0].word_tags.items,
+        }),
       providesTags: word => word ? [{ type: 'Word', id: word.Id }] : []
     }),
     createWord: builder.mutation<Word, Omit<Word, 'Id'>>({
@@ -138,6 +155,7 @@ export const {
   useGetLanguageWithWordsAndPhrasesQuery,
   useListWordsQuery,
   useGetWordQuery,
+  useGetWordWithPhrasesAndTagsQuery,
   useCreateWordMutation,
   useUpdateWordMutation,
   useDeleteWordMutation,
