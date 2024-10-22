@@ -95,6 +95,7 @@ export const api = createApi({
         method: 'POST',
         body: word,
       }),
+      transformResponse: (response: { value: Word[] }) => response.value[0],
       invalidatesTags: [{ type: 'Word', id: 'LIST' }],
     }),
     updateWord: builder.mutation<Word, Word>({
@@ -155,6 +156,7 @@ export const api = createApi({
         method: 'POST',
         body: phrase,
       }),
+      transformResponse: (response: { value: Phrase[] }) => response.value[0],
       invalidatesTags: [{ type: 'Phrase', id: 'LIST' }],
     }),
     updatePhrase: builder.mutation<Phrase, Phrase>({
@@ -202,4 +204,5 @@ export const {
   useCreatePhraseMutation,
   useUpdatePhraseMutation,
   useDeletePhraseMutation,
+  useCreatePhraseMembershipMutation,
 } = api;

@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { useCreatePhraseMutation } from "../../redux-api";
+import { useCreatePhraseMembershipMutation, useCreatePhraseMutation, useCreateWordMutation } from "../../redux-api";
 import { Step, Stepper } from "@mui/material";
+import { Phrase } from "../../types";
 
 export default function NewPhraseWizard() {
   const [activeStep, setActiveStep] = useState(0);
 
   const [createPhrase, { isLoading: isCreatingPhrase }] = useCreatePhraseMutation();
+  const [createWord, { isLoading: isCreatingWord }] = useCreateWordMutation();
+  const [createPhraseMembership, { isLoading: isCreatingPhraseMembership }] = useCreatePhraseMembershipMutation();
 
   const [language, setLanguage] = useState<string>("");
   const [spelling, setSpelling] = useState<string>("");
+  const [phrase, setPhrase] = useState<Phrase | undefined>(undefined);
 
   return <div>
     <h1>Add Phrase</h1>
@@ -24,10 +28,35 @@ export default function NewPhraseWizard() {
               Language: language,
               Spelling: spelling,
               Creation: new Date(),
+            }).then(result => {
+              console.log(result)
+              if (result.data) {
+                setPhrase(result.data);
+                const words = spelling.match(/\b(\w+)\b/g) ?? [];
+                console.log(words)
+                for (var word of words) {
+                  createWord({
+                    Language: language,
+                    Spelling: word,
+                    Creation: new Date(),
+                  }).then(wordResult => {
+                    console.log(wordResult)
+                    if (wordResult.data) {
+                      createPhraseMembership({
+                        Word: wordResult.data.Id,
+                        Phrase: result.data.Id,
+                        Creation: new Date(),
+                      })
+                    }
+                  })
+                }
+              }
             });
             setActiveStep(1);
-            // const words = spelling.match(/\b(\w+)\b/g) ?? [];
           }}>Create</button>
+        </Step>
+        <Step>
+
         </Step>
       </Stepper>}
   </div >
