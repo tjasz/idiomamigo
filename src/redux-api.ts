@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Language, Phrase, PhraseTranslation, Tag, Word, WordTranslation } from './types';
+import { Language, Phrase, PhraseMembership, PhraseTranslation, Tag, Word, WordTranslation } from './types';
 
 export const api = createApi({
   reducerPath: 'api',
@@ -171,6 +171,14 @@ export const api = createApi({
         method: 'DELETE',
       }),
       invalidatesTags: (result, error, id) => [{ type: 'Phrase', id }],
+    }),
+    createPhraseMembership: builder.mutation<PhraseMembership, Omit<PhraseMembership, 'Id'>>({
+      query: (membership) => ({
+        url: `rest/PhraseMembership`,
+        method: 'POST',
+        body: membership,
+      }),
+      invalidatesTags: [], // TODO
     }),
   }),
 });
