@@ -62,6 +62,16 @@ export const api = createApi({
         ]
         : [{ type: 'Word', id: 'LIST' }],
     }),
+    listWordsWithFilter: builder.query<Word[], string>({
+      query: (filter) => `rest/Word?$filter=${filter}`,
+      transformResponse: (response: { value: Word[] }) => response.value,
+      providesTags: (result) => result
+        ? [
+          ...result.map<{ type: 'Word', id: number }>(word => ({ type: 'Word', id: word.Id })),
+          { type: 'Word', id: 'LIST' }
+        ]
+        : [{ type: 'Word', id: 'LIST' }],
+    }),
     getWord: builder.query<Word, number>({
       query: (id) => `rest/Word/Id/${id}`,
       transformResponse: (response: { value: Word }) => response.value,
@@ -191,6 +201,7 @@ export const {
   useGetLanguageQuery,
   useGetLanguageWithWordsAndPhrasesQuery,
   useListWordsQuery,
+  useListWordsWithFilterQuery,
   useGetWordQuery,
   useGetWordWithPhrasesAndTagsQuery,
   useGetTranslationsForWordQuery,
