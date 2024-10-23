@@ -7,7 +7,12 @@ describe("splitIntoWords", () => {
       "Let's get this party started.",
       ["let's", "get", "this", "party", "started"]
     ],
-    // Test with Spanish question marks, á, ó, and ñ
+    // Test with single quote marks - which differ from the apostrophe/contraction example
+    [
+      "He said, 'I was seven and you were nine.'",
+      ["he", "said", "i", "was", "seven", "and", "you", "were", "nine"]
+    ],
+    // Test with Spanish question marks, á (at the end of a word), ó, and ñ
     [
       "¿Dónde está el baño?",
       ["dónde", "está", "el", "baño"]
