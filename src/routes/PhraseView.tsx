@@ -62,7 +62,7 @@ const WordDetails: FC<IWordDetailsParams> = ({ phrase }) => {
   const [createPhraseMembership, { isLoading: isCreatingPhraseMembership }] = useCreatePhraseMembershipMutation();
   const { data: potentialWordsInDb, error: potentialWordsError, isLoading: potentialWordsLoading } = useListWordsWithFilterQuery(
     potentialWords.map(word => `Spelling eq '${word}'`).join(" or "),
-    { skip: phrase.Spelling.length === 0 }
+    { skip: phrase.Spelling.length === 0 || potentialWords.length < 1 }
   );
 
   // TODO use lookup to make this more efficient - TODO make it case-insensitive
