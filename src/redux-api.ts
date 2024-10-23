@@ -53,7 +53,7 @@ export const api = createApi({
       providesTags: (lang) => lang ? [{ type: 'Language', id: lang.Name }] : []
     }),
     listWords: builder.query<Word[], void>({
-      query: () => `rest/Word`,
+      query: () => `rest/Word?$orderby=Language,Spelling,Creation`,
       transformResponse: (response: { value: Word[] }) => response.value,
       providesTags: (result) => result
         ? [
