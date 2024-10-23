@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useGetPhraseWithWordsAndTagsQuery, useGetTranslationsForPhraseQuery, useListWordsWithFilterQuery } from "../redux-api";
+import { useCreatePhraseMembershipMutation, useCreateWordMutation, useGetPhraseWithWordsAndTagsQuery, useGetTranslationsForPhraseQuery, useListWordsWithFilterQuery } from "../redux-api";
 import splitIntoWords from "../text/splitIntoWords";
 import { Phrase, Word } from "../types";
 
@@ -58,11 +58,14 @@ const WordDetails: FC<IWordDetailsParams> = ({ phrase }) => {
   // TODO use lookup to make this more efficient
   const potentialWords = splitIntoWords(phrase.Spelling).filter(w => !phrase.Words.map(w => w.Spelling).includes(w));
 
+  const [createWord, { isLoading: isCreatingWord }] = useCreateWordMutation();
+  const [createPhraseMembership, { isLoading: isCreatingPhraseMembership }] = useCreatePhraseMembershipMutation();
   const { data: potentialWordsInDb, error: potentialWordsError, isLoading: potentialWordsLoading } = useListWordsWithFilterQuery(
     potentialWords.map(word => `Spelling eq '${word}'`).join(" or "),
     { skip: phrase.Spelling.length === 0 }
   );
 
+  // TODO use lookup to make this more efficient
   const wordsNotInDb = potentialWords.filter(w => potentialWordsInDb ? !potentialWordsInDb.map(w => w.Spelling).includes(w) : true);
 
   return <div>
@@ -73,11 +76,32 @@ const WordDetails: FC<IWordDetailsParams> = ({ phrase }) => {
     </ul>
     <h3>Words in DB that might be in Phrase</h3>
     <ul>
-      {potentialWordsInDb?.map(word => <li key={word.Id}><Link to={`/Phrases/${word.Id}`}>{word.Spelling}</Link></li>)}
+      {potentialWordsInDb?.map(word => <li key={word.Id}>
+        <Link to={`/Phrases/${word.Id}`}>{word.Spelling}</Link>
+        <button onClick={() => createPhraseMembership({ Word: word.Id, Phrase: phrase.Id, Creation: new Date() })}>Link</button>
+      </li>)}
     </ul>
     <h3>Words not in DB that might be in Phrase</h3>
     <ul>
-      {wordsNotInDb.map(word => <li key={word}>{word}</li>)}
+      {wordsNotInDb.map(word => <li key={word}>
+        {word}
+        <button onClick={() => {
+          createWord({
+            Language: phrase.Language,
+            Spelling: word,
+            Creation: new Date(),
+          }).then(wordResult => {
+            console.log(wordResult)
+            if (wordResult.data) {
+              createPhraseMembership({
+                Word: wordResult.data.Id,
+                Phrase: phrase.Id,
+                Creation: new Date(),
+              })
+            }
+          })
+        }}>Create and Link</button>
+      </li>)}
     </ul>
   </div>
 }
