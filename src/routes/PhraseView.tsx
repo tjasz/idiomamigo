@@ -55,7 +55,7 @@ export function PhraseView() {
 interface IWordDetailsParams { phrase: Phrase & { Words: Word[] } };
 
 const WordDetails: FC<IWordDetailsParams> = ({ phrase }) => {
-  // TODO use lookup to make this more efficient
+  // TODO use lookup to make this more efficient - TODO make it case-insensitive
   const potentialWords = splitIntoWords(phrase.Spelling).filter(w => !phrase.Words.map(w => w.Spelling).includes(w));
 
   const [createWord, { isLoading: isCreatingWord }] = useCreateWordMutation();
@@ -65,7 +65,7 @@ const WordDetails: FC<IWordDetailsParams> = ({ phrase }) => {
     { skip: phrase.Spelling.length === 0 }
   );
 
-  // TODO use lookup to make this more efficient
+  // TODO use lookup to make this more efficient - TODO make it case-insensitive
   const wordsNotInDb = potentialWords.filter(w => potentialWordsInDb ? !potentialWordsInDb.map(w => w.Spelling).includes(w) : true);
 
   return <div>

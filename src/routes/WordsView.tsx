@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 
 export function WordsView() {
   const { data, error, isLoading } = useListWordsQuery();
+
+  // TODO show error if delete fails (may be due to being part of a PhraseMembership or other relation)
   const [deleteWord, isDeletingWord] = useDeleteWordMutation();
 
   return <div>
