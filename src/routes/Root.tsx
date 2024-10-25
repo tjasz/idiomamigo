@@ -28,7 +28,7 @@ export default function Root() {
         </List>
       </Box>
     </Drawer>
-    <div style={{ marginLeft: drawerWidth }}>
+    <div style={{ marginLeft: drawerWidth, marginBottom: '2em' }}>
       <Breadcrumbs>
         {breadcrumbs.map(crumb =>
           <Link to={crumb.path}>{crumb.title}</Link>
@@ -42,6 +42,8 @@ export default function Root() {
       bottom: 0,
       width: '100%',
       textAlign: 'center',
+      backgroundColor: '#9cf',
+      borderTop: '1px solid black',
     }}>
       áÁ éÉ íÍ óÓ úÚ üÜ ñÑ ¿ ¡
     </div>
