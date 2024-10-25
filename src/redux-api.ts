@@ -216,6 +216,14 @@ export const api = createApi({
         }),
       providesTags: (tag) => tag ? [{ type: 'Tag', id: tag.Name }] : []
     }),
+    createTag: builder.mutation<Tag, Tag>({
+      query: (tag) => ({
+        url: `rest/Tag`,
+        method: 'POST',
+        body: tag,
+      }),
+      invalidatesTags: [{ type: 'Tag', id: 'LIST' }],
+    }),
   }),
 });
 
@@ -242,4 +250,5 @@ export const {
   useCreatePhraseMembershipMutation,
   useListTagsQuery,
   useGetTagWithWordsAndPhrasesQuery,
+  useCreateTagMutation,
 } = api;
