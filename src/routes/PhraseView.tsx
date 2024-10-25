@@ -2,7 +2,7 @@ import React, { FC } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useCreatePhraseMembershipMutation, useCreateWordMutation, useGetPhraseWithWordsAndTagsQuery, useGetTranslationsForPhraseQuery, useListWordsWithFilterQuery } from "../redux-api";
 import splitIntoWords from "../text/splitIntoWords";
-import { Phrase, Word } from "../types";
+import { Phrase, Tag, Word } from "../types";
 import ApiError from "../ApiError";
 import { LinearProgress } from "@mui/material";
 
@@ -46,10 +46,7 @@ export function PhraseView() {
           </div>
       }
       <WordDetails phrase={phrase} />
-      <h2>Tags:</h2>
-      <ul>
-        {phrase.Tags.map(tag => <li key={tag.Name}><Link to={`/Tags/${tag.Name}`}>{tag.Name}</Link></li>)}
-      </ul>
+      <TagDetails tags={phrase.Tags} />
     </div>}
   </div>
 }
@@ -117,6 +114,17 @@ const WordDetails: FC<IWordDetailsParams> = ({ phrase }) => {
           })
         }}>Create and Link</button>
       </li>)}
+    </ul>
+  </div>
+}
+
+interface ITagDetailsParams { tags: Tag[] };
+
+const TagDetails: FC<ITagDetailsParams> = ({ tags }) => {
+  return <div>
+    <h2>Tags:</h2>
+    <ul>
+      {tags.map(tag => <li key={tag.Name}><Link to={`/Tags/${tag.Name}`}>{tag.Name}</Link></li>)}
     </ul>
   </div>
 }
