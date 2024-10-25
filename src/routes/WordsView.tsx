@@ -6,7 +6,7 @@ export function WordsView() {
   const { data, error, isLoading } = useListWordsQuery();
 
   // TODO show error if delete fails (may be due to being part of a PhraseMembership or other relation)
-  const [deleteWord, isDeletingWord] = useDeleteWordMutation();
+  const [deleteWord, { isLoading: isDeletingWord }] = useDeleteWordMutation();
 
   return <div>
     <h1>Words</h1>
@@ -24,7 +24,7 @@ export function WordsView() {
           <td><Link to={`/Languages/${word.Language}`}>{word.Language}</Link></td>
           <td><Link to={word.Id.toString()}>{word.Spelling}</Link></td>
           <td>{word.Creation.toLocaleString()}</td>
-          <td><button onClick={() => deleteWord(word.Id)}><span style={{ color: "red" }}>DELETE</span></button></td>
+          <td><button disabled={isDeletingWord} onClick={() => deleteWord(word.Id)}><span style={{ color: "red" }}>DELETE</span></button></td>
         </tr>)}
       </tbody>
     </table>
