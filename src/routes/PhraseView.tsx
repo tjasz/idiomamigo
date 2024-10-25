@@ -3,6 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import { useCreatePhraseMembershipMutation, useCreateWordMutation, useGetPhraseWithWordsAndTagsQuery, useGetTranslationsForPhraseQuery, useListWordsWithFilterQuery } from "../redux-api";
 import splitIntoWords from "../text/splitIntoWords";
 import { Phrase, Word } from "../types";
+import ApiError from "../ApiError";
+import { LinearProgress } from "@mui/material";
 
 export function PhraseView() {
   const params = useParams();
@@ -12,11 +14,11 @@ export function PhraseView() {
   const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useGetTranslationsForPhraseQuery(IdAsInt, { skip: Id === undefined });
 
   if (error) {
-    return <span style={{ color: "red" }}>{JSON.stringify(error)}</span>;
+    return <ApiError error={error} />
   }
 
   if (isLoading) {
-    return "...";
+    return <LinearProgress />;
   }
 
   if (!phrase) {
