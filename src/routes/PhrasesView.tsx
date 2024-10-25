@@ -44,6 +44,7 @@ export function PhrasesView() {
         <tr>
           <td>
             <select onChange={(event) => setLanguage(event.target.value)}>
+              <option value={undefined} disabled selected><em>Select...</em></option>
               {languages.map(language => <option key={language.Name} value={language.Name}>
                 {language.Name}
               </option>)}
