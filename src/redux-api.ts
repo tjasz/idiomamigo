@@ -206,7 +206,7 @@ export const api = createApi({
       query: (name) => ({
         url: 'graphql',
         method: 'POST',
-        body: { query: `{tags(filter:{Name:{eq:"${name}"}}){items{Name language_words{items{Id Spelling}} language_phrases{items{Id Spelling}}}}}` },
+        body: { query: `{tags(filter:{Name:{eq:"${name}"}}){items{Name tag_words{items{Id Spelling}} tag_phrases{items{Id Spelling}}}}}` },
       }),
       transformResponse:
         (response: { data: { tags: { items: (Tag & { tag_words: { items: Word[] }, tag_phrases: { items: Phrase[] } })[] } } }, meta, arg) => ({
