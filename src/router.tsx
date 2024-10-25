@@ -10,6 +10,8 @@ import { PhrasesView } from './routes/PhrasesView';
 import { LanguageView } from './routes/LanguageView';
 import { WordView } from './routes/WordView';
 import { PhraseView } from './routes/PhraseView';
+import { TagsView } from './routes/TagsView';
+import { TagView } from './routes/TagView';
 
 export const router = createBrowserRouter([
   {
@@ -43,11 +45,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "tags",
-        element: <span style={{ color: "red" }}>Not implemented!</span>,
+        element: <TagsView />,
       },
       {
-        path: "tags/:Id",
-        element: <span style={{ color: "red" }}>Not implemented!</span>,
+        path: "tags/:Name",
+        element: <TagView />,
       },
     ],
   },

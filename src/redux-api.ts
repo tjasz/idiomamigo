@@ -4,7 +4,7 @@ import { Language, Phrase, PhraseMembership, PhraseTranslation, Tag, Word, WordT
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({ baseUrl: '/data-api' }),
-  tagTypes: ['Language', 'Word', 'Phrase'],
+  tagTypes: ['Language', 'Word', 'Phrase', 'Tag'],
   endpoints: (builder) => ({
     listLanguages: builder.query<Language[], void>({
       query: () => `rest/Language`,
@@ -192,6 +192,30 @@ export const api = createApi({
       }),
       invalidatesTags: [], // TODO
     }),
+    listTags: builder.query<Tag[], void>({
+      query: () => `rest/Tag`,
+      transformResponse: (response: { value: Tag[] }) => response.value,
+      providesTags: (result) => result
+        ? [
+          ...result.map<{ type: 'Tag', id: string }>(tag => ({ type: 'Tag', id: tag.Name })),
+          { type: 'Tag', id: 'LIST' }
+        ]
+        : [{ type: 'Tag', id: 'LIST' }],
+    }),
+    getTagWithWordsAndPhrases: builder.query<Tag & { Words: Word[], Phrases: Phrase[] }, string>({
+      query: (name) => ({
+        url: 'graphql',
+        method: 'POST',
+        body: { query: `{tags(filter:{Name:{eq:"${name}"}}){items{Name language_words{items{Id Spelling}} language_phrases{items{Id Spelling}}}}}` },
+      }),
+      transformResponse:
+        (response: { data: { tags: { items: (Tag & { tag_words: { items: Word[] }, tag_phrases: { items: Phrase[] } })[] } } }, meta, arg) => ({
+          Name: response.data.tags.items[0].Name,
+          Words: response.data.tags.items[0].tag_words.items,
+          Phrases: response.data.tags.items[0].tag_phrases.items,
+        }),
+      providesTags: (tag) => tag ? [{ type: 'Tag', id: tag.Name }] : []
+    }),
   }),
 });
 
@@ -216,4 +240,6 @@ export const {
   useUpdatePhraseMutation,
   useDeletePhraseMutation,
   useCreatePhraseMembershipMutation,
+  useListTagsQuery,
+  useGetTagWithWordsAndPhrasesQuery,
 } = api;

@@ -1,13 +1,13 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
-import { useGetLanguageWithWordsAndPhrasesQuery } from "../redux-api";
+import { useGetTagWithWordsAndPhrasesQuery } from "../redux-api";
 import ApiError from "../ApiError";
 import { LinearProgress } from "@mui/material";
 
-export function LanguageView() {
+export function TagView() {
   const params = useParams();
   const { Name } = params;
-  const { data, error, isLoading } = useGetLanguageWithWordsAndPhrasesQuery(Name!, { skip: Name === undefined });
+  const { data, error, isLoading } = useGetTagWithWordsAndPhrasesQuery(Name!, { skip: Name === undefined });
 
   if (error) {
     return <ApiError error={error} />
@@ -18,7 +18,7 @@ export function LanguageView() {
   }
 
   return <div>
-    <h1>Language: '{Name}'</h1>
+    <h1>Tag: '{Name}'</h1>
     {data && <div>
       <h2>Words:</h2>
       <ul>

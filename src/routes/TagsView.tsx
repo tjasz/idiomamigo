@@ -1,11 +1,11 @@
 import React from "react";
-import { useListLanguagesQuery } from "../redux-api";
+import { useListTagsQuery } from "../redux-api";
 import { Link } from "react-router-dom";
 import ApiError from "../ApiError";
 import { LinearProgress } from "@mui/material";
 
-export function LanguagesView() {
-  const { data, error, isLoading } = useListLanguagesQuery();
+export function TagsView() {
+  const { data, error, isLoading } = useListTagsQuery();
 
   if (error) {
     return <ApiError error={error} />
@@ -16,10 +16,10 @@ export function LanguagesView() {
   }
 
   return <div>
-    <h1>Languages</h1>
+    <h1>Tags</h1>
     <ul>
-      {data && data.map(lang => <li>
-        <Link to={`${lang.Name}`}>{lang.Name}</Link>
+      {data && data.map(tag => <li>
+        <Link to={`${tag.Name}`}>{tag.Name}</Link>
       </li>)}
     </ul>
   </div>
