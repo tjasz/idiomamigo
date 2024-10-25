@@ -36,5 +36,14 @@ export default function Root() {
       </Breadcrumbs>
       <Outlet />
     </div>
+    <div style={{
+      position: 'fixed',
+      left: 0,
+      bottom: 0,
+      width: '100%',
+      textAlign: 'center',
+    }}>
+      áÁ éÉ íÍ óÓ úÚ üÜ ñÑ ¿ ¡
+    </div>
   </div>
 }
