@@ -10,7 +10,6 @@ import { PhrasesView } from './routes/PhrasesView';
 import { LanguageView } from './routes/LanguageView';
 import { WordView } from './routes/WordView';
 import { PhraseView } from './routes/PhraseView';
-import NewPhraseWizard from './routes/wizards/NewPhraseWizard';
 
 export const router = createBrowserRouter([
   {
@@ -41,10 +40,6 @@ export const router = createBrowserRouter([
       {
         path: "phrases/:Id",
         element: <PhraseView />,
-      },
-      {
-        path: "wizards/newPhrase",
-        element: <NewPhraseWizard />,
       },
       {
         path: "tags",

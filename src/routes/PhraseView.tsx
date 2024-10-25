@@ -70,6 +70,14 @@ const WordDetails: FC<IWordDetailsParams> = ({ phrase }) => {
   // TODO use lookup to make this more efficient - TODO make it case-insensitive
   const wordsNotInDb = potentialWords.filter(w => potentialWordsInDb ? !potentialWordsInDb.map(w => w.Spelling).includes(w) : true);
 
+  if (potentialWordsError) {
+    return <ApiError error={potentialWordsError} />
+  }
+
+  if (potentialWordsLoading) {
+    return <LinearProgress />;
+  }
+
   return <div>
     <h2>Words</h2>
     <h3>Words connected to Phrase</h3>
@@ -80,14 +88,19 @@ const WordDetails: FC<IWordDetailsParams> = ({ phrase }) => {
     <ul>
       {potentialWordsInDb?.map(word => <li key={word.Id}>
         <Link to={`/Phrases/${word.Id}`}>{word.Spelling}</Link>
-        <button onClick={() => createPhraseMembership({ Word: word.Id, Phrase: phrase.Id, Creation: new Date() })}>Link</button>
+        <button
+          disabled={isCreatingPhraseMembership}
+          onClick={() => createPhraseMembership({ Word: word.Id, Phrase: phrase.Id, Creation: new Date() })}
+        >
+          Link
+        </button>
       </li>)}
     </ul>
     <h3>Words not in DB that might be in Phrase</h3>
     <ul>
       {wordsNotInDb.map(word => <li key={word}>
         {word}
-        <button onClick={() => {
+        <button disabled={isCreatingWord} onClick={() => {
           createWord({
             Language: phrase.Language,
             Spelling: word,
