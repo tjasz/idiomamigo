@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
-import { useGetTranslationsForWordQuery, useGetWordWithPhrasesAndTagsQuery } from "../redux-api";
+import { useCreateTagWordRelationMutation, useGetTranslationsForWordQuery, useGetWordWithPhrasesAndTagsQuery } from "../redux-api";
+import TagDetails from "../TagDetails";
 
 export function WordView() {
   const params = useParams();
@@ -8,6 +9,7 @@ export function WordView() {
   const IdAsInt = parseInt(Id ?? "0");
   const { data, error, isLoading } = useGetWordWithPhrasesAndTagsQuery(IdAsInt, { skip: Id === undefined });
   const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useGetTranslationsForWordQuery(IdAsInt, { skip: Id === undefined });
+  const [attachTag, { isLoading: isAttaching }] = useCreateTagWordRelationMutation();
 
   return <div>
     {isLoading && "..."}
@@ -35,10 +37,11 @@ export function WordView() {
       <ul>
         {data.Phrases.map(phrase => <li key={phrase.Id}><Link to={`/Phrases/${phrase.Id}`}>{phrase.Spelling}</Link></li>)}
       </ul>
-      <h2>Tags:</h2>
-      <ul>
-        {data.Tags.map(tag => <li key={tag.Name}><Link to={`/Tags/${tag.Name}`}>{tag.Name}</Link></li>)}
-      </ul>
+      <TagDetails tags={data.Tags} isAttaching={isAttaching} onAttachTag={(tagName) => attachTag({
+        Tag: tagName,
+        Word: data.Id,
+        Creation: new Date(),
+      })} />
     </div>}
   </div>
 }

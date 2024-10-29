@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Language, Phrase, PhraseMembership, PhraseTranslation, Tag, TagPhraseRelation, Word, WordTranslation } from './types';
+import { Language, Phrase, PhraseMembership, PhraseTranslation, Tag, TagPhraseRelation, TagWordRelation, Word, WordTranslation } from './types';
 
 export const api = createApi({
   reducerPath: 'api',
@@ -239,6 +239,14 @@ export const api = createApi({
       }),
       invalidatesTags: (result, error, id) => [], // TODO
     }),
+    createTagWordRelation: builder.mutation<TagWordRelation, Omit<TagWordRelation, 'Id'>>({
+      query: (membership) => ({
+        url: `rest/TagWordRelation`,
+        method: 'POST',
+        body: membership,
+      }),
+      invalidatesTags: [], // TODO
+    }),
   }),
 });
 
@@ -268,4 +276,5 @@ export const {
   useCreateTagMutation,
   useCreateTagPhraseRelationMutation,
   useDeleteTagPhraseRelationMutation,
+  useCreateTagWordRelationMutation,
 } = api;

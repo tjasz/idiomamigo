@@ -1,10 +1,11 @@
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useCreatePhraseMembershipMutation, useCreateTagPhraseRelationMutation, useCreateWordMutation, useGetPhraseWithWordsAndTagsQuery, useGetTranslationsForPhraseQuery, useListTagsQuery, useListWordsWithFilterQuery } from "../redux-api";
+import { useCreatePhraseMembershipMutation, useCreateTagPhraseRelationMutation, useCreateWordMutation, useGetPhraseWithWordsAndTagsQuery, useGetTranslationsForPhraseQuery, useListWordsWithFilterQuery } from "../redux-api";
 import splitIntoWords from "../text/splitIntoWords";
-import { Phrase, Tag, Word } from "../types";
+import { Phrase, Word } from "../types";
 import ApiError from "../ApiError";
-import { CircularProgress, Dialog, DialogTitle, LinearProgress } from "@mui/material";
+import { LinearProgress } from "@mui/material";
+import TagDetails from "../TagDetails";
 
 export function PhraseView() {
   const params = useParams();
@@ -12,6 +13,7 @@ export function PhraseView() {
   const IdAsInt = parseInt(Id ?? "0");
   const { data: phrase, error, isLoading } = useGetPhraseWithWordsAndTagsQuery(IdAsInt, { skip: Id === undefined });
   const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useGetTranslationsForPhraseQuery(IdAsInt, { skip: Id === undefined });
+  const [attachTag, { isLoading: isAttaching }] = useCreateTagPhraseRelationMutation();
 
   if (error) {
     return <ApiError error={error} />
@@ -46,7 +48,11 @@ export function PhraseView() {
           </div>
       }
       <WordDetails phrase={phrase} />
-      <TagDetails tags={phrase.Tags} phraseId={phrase.Id} />
+      <TagDetails tags={phrase.Tags} isAttaching={isAttaching} onAttachTag={(tagName) => attachTag({
+        Tag: tagName,
+        Phrase: phrase.Id,
+        Creation: new Date(),
+      })} />
     </div>}
   </div>
 }
@@ -115,69 +121,5 @@ const WordDetails: FC<IWordDetailsParams> = ({ phrase }) => {
         }}>Create and Link</button>
       </li>)}
     </ul>
-  </div>
-}
-
-interface ITagDetailsParams { tags: Tag[], phraseId: number };
-
-const TagDetails: FC<ITagDetailsParams> = ({ tags, phraseId }) => {
-  const [attachTag, { isLoading: isAttaching }] = useCreateTagPhraseRelationMutation();
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  return <div>
-    <h2>Tags:</h2>
-    <ul>
-      {tags.map(tag => <li key={tag.Name}>
-        <Link to={`/Tags/${tag.Name}`}>{tag.Name}</Link>
-      </li>)}
-    </ul>
-    <button onClick={() => setDialogOpen(true)}>Add</button>
-    <Dialog open={dialogOpen}>
-      <DialogTitle>Attach Tag</DialogTitle>
-      {isAttaching
-        ? <CircularProgress />
-        : <TagSelector disabledTagnames={new Set(tags.map(tag => tag.Name))} onConfirm={(value: Tag) => {
-          attachTag({
-            Tag: value.Name,
-            Phrase: phraseId,
-            Creation: new Date(),
-          });
-          setDialogOpen(false);
-        }} />
-      }
-    </Dialog>
-  </div>
-}
-
-interface ITagSelectorProps {
-  onConfirm: (value: Tag) => void,
-  disabledTagnames: Set<string>,
-};
-const TagSelector: FC<ITagSelectorProps> = ({ onConfirm, disabledTagnames }) => {
-  const { data: tags, isLoading: tagsLoading, error: tagsError } = useListTagsQuery();
-  const [tag, setTag] = useState<Tag | undefined>(undefined);
-
-  if (tagsLoading) {
-    return <LinearProgress />
-  }
-
-  if (tagsError) {
-    return <ApiError error={tagsError} />
-  }
-
-  return <div>
-    <select onChange={event => setTag(tags?.[parseInt(event.target.value)])}>
-      <option value={undefined} disabled selected><em>Select...</em></option>
-      {tags?.map((tag, index) => <option key={index} value={index}> disabled={disabledTagnames.has(tag.Name)}
-        {tag.Name}
-      </option>)}
-    </select>
-    <button onClick={() => {
-      if (tag === undefined) {
-        alert("Tag name must be defined to confirm.")
-      } else {
-        onConfirm(tag)
-      }
-    }}>Confirm</button>
   </div>
 }
