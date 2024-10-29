@@ -134,20 +134,26 @@ const TagDetails: FC<ITagDetailsParams> = ({ tags, phraseId }) => {
     <button onClick={() => setDialogOpen(true)}>Add</button>
     <Dialog open={dialogOpen}>
       <DialogTitle>Attach Tag</DialogTitle>
-      {isAttaching ? <CircularProgress /> : <TagSelector onConfirm={(value: Tag) => {
-        attachTag({
-          Tag: value.Name,
-          Phrase: phraseId,
-          Creation: new Date(),
-        });
-        setDialogOpen(false);
-      }} />}
+      {isAttaching
+        ? <CircularProgress />
+        : <TagSelector disabledTagnames={new Set(tags.map(tag => tag.Name))} onConfirm={(value: Tag) => {
+          attachTag({
+            Tag: value.Name,
+            Phrase: phraseId,
+            Creation: new Date(),
+          });
+          setDialogOpen(false);
+        }} />
+      }
     </Dialog>
   </div>
 }
 
-interface ITagSelectorProps { onConfirm: (value: Tag) => void };
-const TagSelector: FC<ITagSelectorProps> = ({ onConfirm }) => {
+interface ITagSelectorProps {
+  onConfirm: (value: Tag) => void,
+  disabledTagnames: Set<string>,
+};
+const TagSelector: FC<ITagSelectorProps> = ({ onConfirm, disabledTagnames }) => {
   const { data: tags, isLoading: tagsLoading, error: tagsError } = useListTagsQuery();
   const [tag, setTag] = useState<Tag | undefined>(undefined);
 
@@ -162,7 +168,9 @@ const TagSelector: FC<ITagSelectorProps> = ({ onConfirm }) => {
   return <div>
     <select onChange={event => setTag(tags?.[parseInt(event.target.value)])}>
       <option value={undefined} disabled selected><em>Select...</em></option>
-      {tags?.map((tag, index) => <option key={index} value={index}>{tag.Name}</option>)}
+      {tags?.map((tag, index) => <option key={index} value={index}> disabled={disabledTagnames.has(tag.Name)}
+        {tag.Name}
+      </option>)}
     </select>
     <button onClick={() => {
       if (tag === undefined) {
