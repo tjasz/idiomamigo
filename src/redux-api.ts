@@ -31,23 +31,42 @@ export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: '/data-api' }),
   tagTypes,
   endpoints: (builder) => {
-    return ({
-      // Language CRUD operations
-      getLanguage: builder.query<Language, string>({
-        query: (name) => `rest/Language/Name/${name}`,
-        transformResponse: (response: { value: Language }) => response.value,
-        providesTags: (lang) => lang ? [{ type: TagType.Language, id: lang.Name }] : []
-      }),
-      listLanguages: builder.query<Language[], void>({
-        query: () => `rest/Language`,
-        transformResponse: (response: { value: Language[] }) => response.value,
+    function createOperation<T, IdFieldName extends string>(tagType: TagType) {
+      return builder.mutation<T, Omit<T, IdFieldName>>({
+        query: (item) => ({
+          url: `rest/${tagType}`,
+          method: 'POST',
+          body: item
+        }),
+        transformResponse: (response: { value: T[] }) => response.value[0],
+        invalidatesTags: [{ type: tagType, id: listTagId }]
+      });
+    }
+    function getOperation<T>(tagType: TagType, idFieldName: keyof (T)) {
+      return builder.query<T, string>({
+        query: (id) => `rest/${tagType}/${String(idFieldName)}/${id}`,
+        transformResponse: (response: { value: T }) => response.value,
+        providesTags: (item) => item ? [{ type: tagType, id: String(item[idFieldName]) }] : []
+      });
+    }
+    function listOperation<T>(tagType: TagType, idFieldName: keyof (T)) {
+      return builder.query<T[], void>({
+        query: () => `rest/${tagType}`,
+        transformResponse: (response: { value: T[] }) => response.value,
         providesTags: (result) => result
           ? [
-            ...result.map<{ type: TagType.Language, id: string }>(lang => ({ type: TagType.Language, id: lang.Name })),
-            { type: TagType.Language, id: listTagId }
+            ...result.map<{ type: TagType, id: string }>(item => ({ type: tagType, id: String(item[idFieldName]) })),
+            { type: tagType, id: listTagId }
           ]
-          : [{ type: TagType.Language, id: listTagId }],
-      }),
+          : [{ type: tagType, id: listTagId }],
+      });
+    }
+
+    return ({
+      // Language CRUD operations
+      createLanguage: createOperation<Language, 'Name'>(TagType.Language),
+      getLanguage: getOperation<Language>(TagType.Language, 'Name'),
+      listLanguages: listOperation<Language>(TagType.Language, 'Name'),
       // Phrase CRUD operations
       createPhrase: builder.mutation<Phrase, Omit<Phrase, 'Id'>>({
         query: (phrase) => ({
