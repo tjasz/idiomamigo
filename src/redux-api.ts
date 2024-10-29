@@ -215,23 +215,6 @@ export const api = createApi({
     //
     // More complex graphql queries that follow relations
     //
-    listLanguagesWithWords: builder.query<{ Name: string, Words: Word[] }[], void>({
-      query: () => ({
-        url: 'graphql',
-        method: 'POST',
-        body: { query: `{ languages { items {Name language_words { items { Spelling }} } } }` },
-      }),
-      transformResponse:
-        (response: { data: { languages: { items: (Language & { language_words: { items: Word[] } })[] } } }, meta, arg) => response.data.languages.items.map(
-          l => ({ Name: l.Name, Words: l.language_words.items })
-        ),
-      providesTags: (result) => result
-        ? [
-          ...result.map<{ type: TagType.Language, id: string }>(lang => ({ type: TagType.Language, id: lang.Name })),
-          { type: TagType.Language, id: listTagId }
-        ]
-        : [{ type: TagType.Language, id: listTagId }],
-    }),
     getLanguageWithWordsAndPhrases: builder.query<Language & { Words: Word[], Phrases: Phrase[] }, string>({
       query: (name) => ({
         url: 'graphql',
@@ -244,7 +227,15 @@ export const api = createApi({
           Words: response.data.languages.items[0].language_words.items,
           Phrases: response.data.languages.items[0].language_phrases.items,
         }),
-      providesTags: (lang) => lang ? [{ type: TagType.Language, id: lang.Name }] : []
+      providesTags: (lang) => lang
+        ? [
+          { type: TagType.Language, id: lang.Name },
+          { type: TagType.Word, id: listTagId },
+          ...lang.Words.map(word => ({ type: TagType.Word, id: word.Id })),
+          { type: TagType.Phrase, id: listTagId },
+          ...lang.Phrases.map(phrase => ({ type: TagType.Phrase, id: phrase.Id })),
+        ]
+        : []
     }),
     getWordWithPhrasesAndTags: builder.query<Word & { Phrases: Phrase[], Tags: Tag[] }, number>({
       query: (id) => ({
@@ -261,7 +252,17 @@ export const api = createApi({
           Phrases: response.data.words.items[0].word_phrases.items,
           Tags: response.data.words.items[0].word_tags.items,
         }),
-      providesTags: word => word ? [{ type: TagType.Word, id: word.Id }] : []
+      providesTags: word => word
+        ? [
+          { type: TagType.Word, id: word.Id },
+          { type: TagType.Phrase, id: listTagId },
+          ...word.Phrases.map(phrase => ({ type: TagType.Phrase, id: phrase.Id })),
+          { type: TagType.Tag, id: listTagId },
+          ...word.Tags.map(tag => ({ type: TagType.Phrase, id: tag.Name })),
+          { type: TagType.PhraseMembership, id: listTagId },
+          { type: TagType.TagWordRelation, id: listTagId },
+        ]
+        : []
     }),
     getPhraseWithWordsAndTags: builder.query<Phrase & { Words: Word[], Tags: Tag[] }, number>({
       query: (id) => ({
@@ -278,7 +279,17 @@ export const api = createApi({
           Words: response.data.phrases.items[0].phrase_words.items,
           Tags: response.data.phrases.items[0].phrase_tags.items,
         }),
-      providesTags: phrase => phrase ? [{ type: TagType.Phrase, id: phrase.Id }] : []
+      providesTags: phrase => phrase
+        ? [
+          { type: TagType.Phrase, id: phrase.Id },
+          { type: TagType.Word, id: listTagId },
+          ...phrase.Words.map(word => ({ type: TagType.Phrase, id: word.Id })),
+          { type: TagType.Tag, id: listTagId },
+          ...phrase.Tags.map(tag => ({ type: TagType.Phrase, id: tag.Name })),
+          { type: TagType.PhraseMembership, id: listTagId },
+          { type: TagType.TagPhraseRelation, id: listTagId },
+        ]
+        : []
     }),
     getTagWithWordsAndPhrases: builder.query<Tag & { Words: Word[], Phrases: Phrase[] }, string>({
       query: (name) => ({
@@ -292,14 +303,23 @@ export const api = createApi({
           Words: response.data.tags.items[0].tag_words.items,
           Phrases: response.data.tags.items[0].tag_phrases.items,
         }),
-      providesTags: (tag) => tag ? [{ type: TagType.Tag, id: tag.Name }] : []
+      providesTags: (tag) => tag
+        ? [
+          { type: TagType.Tag, id: tag.Name },
+          { type: TagType.Word, id: listTagId },
+          ...tag.Words.map(word => ({ type: TagType.Phrase, id: word.Id })),
+          { type: TagType.Phrase, id: listTagId },
+          ...tag.Phrases.map(phrase => ({ type: TagType.Phrase, id: phrase.Id })),
+          { type: TagType.TagWordRelation, id: listTagId },
+          { type: TagType.TagPhraseRelation, id: listTagId },
+        ]
+        : []
     }),
   }),
 });
 
 export const {
   useListLanguagesQuery,
-  useListLanguagesWithWordsQuery,
   useGetLanguageQuery,
   useGetLanguageWithWordsAndPhrasesQuery,
   useListWordsQuery,
