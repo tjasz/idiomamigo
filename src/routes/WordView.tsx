@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
-import { useCreateTagWordRelationMutation, useGetTranslationsForWordQuery, useGetWordWithPhrasesAndTagsQuery } from "../redux-api";
+import { useCreateTagWordRelationMutation, useListTranslationsForWordQuery, useGetWordWithPhrasesAndTagsQuery } from "../redux-api";
 import TagDetails from "../TagDetails";
 
 export function WordView() {
@@ -8,7 +8,7 @@ export function WordView() {
   const { Id } = params;
   const IdAsInt = parseInt(Id ?? "0");
   const { data, error, isLoading } = useGetWordWithPhrasesAndTagsQuery(IdAsInt, { skip: Id === undefined });
-  const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useGetTranslationsForWordQuery(IdAsInt, { skip: Id === undefined });
+  const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useListTranslationsForWordQuery(IdAsInt, { skip: Id === undefined });
   const [attachTag, { isLoading: isAttaching }] = useCreateTagWordRelationMutation();
 
   return <div>

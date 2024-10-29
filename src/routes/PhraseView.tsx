@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useCreatePhraseMembershipMutation, useCreateTagPhraseRelationMutation, useCreateWordMutation, useGetPhraseWithWordsAndTagsQuery, useGetTranslationsForPhraseQuery, useListWordsWithFilterQuery } from "../redux-api";
+import { useCreatePhraseMembershipMutation, useCreateTagPhraseRelationMutation, useCreateWordMutation, useGetPhraseWithWordsAndTagsQuery, useListTranslationsForPhraseQuery, useListWordsWithFilterQuery } from "../redux-api";
 import splitIntoWords from "../text/splitIntoWords";
 import { Phrase, Word } from "../types";
 import ApiError from "../ApiError";
@@ -12,7 +12,7 @@ export function PhraseView() {
   const { Id } = params;
   const IdAsInt = parseInt(Id ?? "0");
   const { data: phrase, error, isLoading } = useGetPhraseWithWordsAndTagsQuery(IdAsInt, { skip: Id === undefined });
-  const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useGetTranslationsForPhraseQuery(IdAsInt, { skip: Id === undefined });
+  const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useListTranslationsForPhraseQuery(IdAsInt, { skip: Id === undefined });
   const [attachTag, { isLoading: isAttaching }] = useCreateTagPhraseRelationMutation();
 
   if (error) {
