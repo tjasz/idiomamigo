@@ -1,4 +1,4 @@
-import { createApi, EndpointBuilder, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { Language, Phrase, PhraseMembership, PhraseTranslation, Tag, TagPhraseRelation, TagWordRelation, Word, WordTranslation } from './types';
 
 enum TagType {
