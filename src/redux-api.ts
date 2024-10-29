@@ -31,7 +31,7 @@ export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: '/data-api' }),
   tagTypes,
   endpoints: (builder) => {
-    function createOperation<T, IdFieldName extends string>(tagType: TagType) {
+    function createOperation<T, IdFieldName extends keyof (T)>(tagType: TagType) {
       return builder.mutation<T, Omit<T, IdFieldName>>({
         query: (item) => ({
           url: `rest/${tagType}`,
@@ -50,6 +50,7 @@ export const api = createApi({
       });
     }
     function listOperation<T>(tagType: TagType, idFieldName: keyof (T)) {
+      // TODO support $filter and $orderBy
       return builder.query<T[], void>({
         query: () => `rest/${tagType}`,
         transformResponse: (response: { value: T[] }) => response.value,
@@ -61,62 +62,51 @@ export const api = createApi({
           : [{ type: tagType, id: listTagId }],
       });
     }
+    function updateOperation<T>(tagType: TagType, idFieldName: keyof (T)) {
+      return builder.mutation<T, T>({
+        query: ({ [idFieldName]: Id, ...patch }) => ({
+          url: `rest/${tagType}/${String(idFieldName)}/${Id}`,
+          method: 'PUT',
+          body: patch,
+        }),
+        invalidatesTags: (result, error, item) => [{ type: tagType, id: String(item[idFieldName]) }],
+      });
+    }
+    function deleteOperation<T, IdType extends string | number>(tagType: TagType, idFieldName: keyof (T)) {
+      return builder.mutation<T, IdType>({
+        query: (id) => ({
+          url: `rest/${tagType}/${String(idFieldName)}/${id}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: (result, error, id) => [{ type: tagType, id }],
+      });
+    }
 
     return ({
       // Language CRUD operations
       createLanguage: createOperation<Language, 'Name'>(TagType.Language),
       getLanguage: getOperation<Language>(TagType.Language, 'Name'),
       listLanguages: listOperation<Language>(TagType.Language, 'Name'),
+      updateLanguage: updateOperation<Language>(TagType.Language, 'Name'),
+      deleteLanguage: deleteOperation<Language, string>(TagType.Language, 'Name'),
       // Phrase CRUD operations
-      createPhrase: builder.mutation<Phrase, Omit<Phrase, 'Id'>>({
-        query: (phrase) => ({
-          url: `rest/Phrase`,
-          method: 'POST',
-          body: phrase,
-        }),
-        transformResponse: (response: { value: Phrase[] }) => response.value[0],
-        invalidatesTags: [{ type: TagType.Phrase, id: listTagId }],
-      }),
-      getPhrase: builder.query<Phrase, number>({
-        query: (id) => `rest/Phrase/Id/${id}`,
-        transformResponse: (response: { value: Phrase }) => response.value,
-        providesTags: phrase => phrase ? [{ type: TagType.Phrase, id: phrase.Id }] : []
-      }),
-      listPhrases: builder.query<Phrase[], void>({
-        query: () => `rest/Phrase`,
-        transformResponse: (response: { value: Phrase[] }) => response.value,
-        providesTags: (result) => result
-          ? [
-            ...result.map<{ type: TagType.Phrase, id: number }>(phrase => ({ type: TagType.Phrase, id: phrase.Id })),
-            { type: TagType.Phrase, id: listTagId }
-          ]
-          : [{ type: TagType.Phrase, id: listTagId }],
-      }),
-      updatePhrase: builder.mutation<Phrase, Phrase>({
-        query: ({ Id, ...patch }) => ({
-          url: `rest/Phrase/Id/${Id}`,
-          method: 'PUT',
-          body: patch,
-        }),
-        invalidatesTags: (result, error, phrase) => [{ type: TagType.Phrase, id: phrase.Id }],
-      }),
-      deletePhrase: builder.mutation<Phrase, number>({
-        query: (id) => ({
-          url: `rest/Phrase/Id/${id}`,
-          method: 'DELETE',
-        }),
-        invalidatesTags: (result, error, id) => [{ type: TagType.Phrase, id }],
-      }),
+      createPhrase: createOperation<Phrase, 'Id'>(TagType.Phrase),
+      getPhrase: getOperation<Phrase>(TagType.Phrase, 'Id'),
+      listPhrases: listOperation<Phrase>(TagType.Phrase, 'Id'),
+      updatePhrase: updateOperation<Phrase>(TagType.Phrase, 'Id'),
+      deletePhrase: deleteOperation<Phrase, number>(TagType.Phrase, 'Id'),
       // PhraseMembership CRUD operations
-      createPhraseMembership: builder.mutation<PhraseMembership, Omit<PhraseMembership, 'Id'>>({
-        query: (membership) => ({
-          url: `rest/PhraseMembership`,
-          method: 'POST',
-          body: membership,
-        }),
-        invalidatesTags: [{ type: TagType.PhraseMembership, id: listTagId }],
-      }),
+      createPhraseMembership: createOperation<PhraseMembership, 'Id'>(TagType.PhraseMembership),
+      getPhraseMembership: getOperation<PhraseMembership>(TagType.PhraseMembership, 'Id'),
+      listPhraseMemberships: listOperation<PhraseMembership>(TagType.PhraseMembership, 'Id'),
+      updatePhraseMembership: updateOperation<PhraseMembership>(TagType.PhraseMembership, 'Id'),
+      deletePhraseMembership: deleteOperation<PhraseMembership, number>(TagType.PhraseMembership, 'Id'),
       // PhraseTranslation CRUD operations
+      createPhraseTranslation: createOperation<PhraseTranslation, 'Id'>(TagType.PhraseTranslation),
+      getPhraseTranslation: getOperation<PhraseTranslation>(TagType.PhraseTranslation, 'Id'),
+      listPhraseTranslations: listOperation<PhraseTranslation>(TagType.PhraseTranslation, 'Id'),
+      updatePhraseTranslation: updateOperation<PhraseTranslation>(TagType.PhraseTranslation, 'Id'),
+      deletePhraseTranslation: deleteOperation<PhraseTranslation, number>(TagType.PhraseTranslation, 'Id'),
       listTranslationsForPhrase: builder.query<PhraseTranslation[], number>({
         query: (id) => `rest/PhraseTranslation?$filter=Source eq ${id} or Target eq ${id}`,
         transformResponse: (response: { value: PhraseTranslation[] }) => response.value,
@@ -128,66 +118,29 @@ export const api = createApi({
           : [{ type: TagType.PhraseTranslation, id: listTagId }],
       }),
       // Tag CRUD operations
-      listTags: builder.query<Tag[], void>({
-        query: () => `rest/Tag`,
-        transformResponse: (response: { value: Tag[] }) => response.value,
-        providesTags: (result) => result
-          ? [
-            ...result.map<{ type: TagType.Tag, id: string }>(tag => ({ type: TagType.Tag, id: tag.Name })),
-            { type: TagType.Tag, id: listTagId }
-          ]
-          : [{ type: TagType.Tag, id: listTagId }],
-      }),
+      createTag: createOperation<Tag, 'Name'>(TagType.Tag),
+      getTag: getOperation<Tag>(TagType.Tag, 'Name'),
+      listTags: listOperation<Tag>(TagType.Tag, 'Name'),
+      updateTag: updateOperation<Tag>(TagType.Tag, 'Name'),
+      deleteTag: deleteOperation<Tag, string>(TagType.Tag, 'Name'),
       // TagPhraseRelation CRUD operations
-      createTagPhraseRelation: builder.mutation<TagPhraseRelation, Omit<TagPhraseRelation, 'Id'>>({
-        query: (membership) => ({
-          url: `rest/TagPhraseRelation`,
-          method: 'POST',
-          body: membership,
-        }),
-        invalidatesTags: [{ type: TagType.TagPhraseRelation, id: listTagId }],
-      }),
-      deleteTagPhraseRelation: builder.mutation<TagPhraseRelation, number>({
-        query: (id) => ({
-          url: `rest/TagPhraseRelation/Id/${id}`,
-          method: 'DELETE',
-        }),
-        invalidatesTags: (result, error, id) => [{ type: TagType.TagPhraseRelation, id }],
-      }),
+      createTagPhraseRelation: createOperation<TagPhraseRelation, 'Id'>(TagType.TagPhraseRelation),
+      getTagPhraseRelation: getOperation<TagPhraseRelation>(TagType.TagPhraseRelation, 'Id'),
+      listTagPhraseRelations: listOperation<TagPhraseRelation>(TagType.TagPhraseRelation, 'Id'),
+      updateTagPhraseRelation: updateOperation<TagPhraseRelation>(TagType.TagPhraseRelation, 'Id'),
+      deleteTagPhraseRelation: deleteOperation<TagPhraseRelation, number>(TagType.TagPhraseRelation, 'Id'),
       // TagWordRelation CRUD operations
-      createTagWordRelation: builder.mutation<TagWordRelation, Omit<TagWordRelation, 'Id'>>({
-        query: (membership) => ({
-          url: `rest/TagWordRelation`,
-          method: 'POST',
-          body: membership,
-        }),
-        invalidatesTags: [{ type: TagType.TagWordRelation, id: listTagId }],
-      }),
+      createTagWordRelation: createOperation<TagWordRelation, 'Id'>(TagType.TagWordRelation),
+      getTagWordRelation: getOperation<TagWordRelation>(TagType.TagWordRelation, 'Id'),
+      listTagWordRelations: listOperation<TagWordRelation>(TagType.TagWordRelation, 'Id'),
+      updateTagWordRelation: updateOperation<TagWordRelation>(TagType.TagWordRelation, 'Id'),
+      deleteTagWordRelation: deleteOperation<TagWordRelation, number>(TagType.TagWordRelation, 'Id'),
       // Word CRUD operations
-      createWord: builder.mutation<Word, Omit<Word, 'Id'>>({
-        query: (word) => ({
-          url: `rest/Word`,
-          method: 'POST',
-          body: word,
-        }),
-        transformResponse: (response: { value: Word[] }) => response.value[0],
-        invalidatesTags: [{ type: TagType.Word, id: listTagId }],
-      }),
-      getWord: builder.query<Word, number>({
-        query: (id) => `rest/Word/Id/${id}`,
-        transformResponse: (response: { value: Word }) => response.value,
-        providesTags: word => word ? [{ type: TagType.Word, id: word.Id }] : []
-      }),
-      listWords: builder.query<Word[], void>({
-        query: () => `rest/Word?$orderby=Language,Spelling,Creation`,
-        transformResponse: (response: { value: Word[] }) => response.value,
-        providesTags: (result) => result
-          ? [
-            ...result.map<{ type: TagType.Word, id: number }>(word => ({ type: TagType.Word, id: word.Id })),
-            { type: TagType.Word, id: listTagId }
-          ]
-          : [{ type: TagType.Word, id: listTagId }],
-      }),
+      createWord: createOperation<Word, 'Id'>(TagType.Word),
+      getWord: getOperation<Word>(TagType.Word, 'Id'),
+      listWords: listOperation<Word>(TagType.Word, 'Id'),
+      updateWord: updateOperation<Word>(TagType.Word, 'Id'),
+      deleteWord: deleteOperation<Word, number>(TagType.Word, 'Id'),
       listWordsWithFilter: builder.query<Word[], string>({
         query: (filter) => `rest/Word?$filter=${filter}`,
         transformResponse: (response: { value: Word[] }) => response.value,
@@ -198,30 +151,12 @@ export const api = createApi({
           ]
           : [{ type: TagType.Word, id: listTagId }],
       }),
-      updateWord: builder.mutation<Word, Word>({
-        query: ({ Id, ...patch }) => ({
-          url: `rest/Word/Id/${Id}`,
-          method: 'PUT',
-          body: patch,
-        }),
-        invalidatesTags: (result, error, word) => [{ type: TagType.Word, id: word.Id }],
-      }),
-      deleteWord: builder.mutation<Word, number>({
-        query: (id) => ({
-          url: `rest/Word/Id/${id}`,
-          method: 'DELETE',
-        }),
-        invalidatesTags: (result, error, id) => [{ type: TagType.Word, id }],
-      }),
       // WordTranslation CRUD operations
-      createTag: builder.mutation<Tag, Tag>({
-        query: (tag) => ({
-          url: `rest/Tag`,
-          method: 'POST',
-          body: tag,
-        }),
-        invalidatesTags: [{ type: TagType.Tag, id: listTagId }],
-      }),
+      createWordTranslation: createOperation<WordTranslation, 'Id'>(TagType.WordTranslation),
+      getWordTranslation: getOperation<WordTranslation>(TagType.WordTranslation, 'Id'),
+      listWordTranslations: listOperation<WordTranslation>(TagType.WordTranslation, 'Id'),
+      updateWordTranslation: updateOperation<WordTranslation>(TagType.WordTranslation, 'Id'),
+      deleteWordTranslation: deleteOperation<WordTranslation, number>(TagType.WordTranslation, 'Id'),
       listTranslationsForWord: builder.query<WordTranslation[], number>({
         query: (id) => `rest/WordTranslation?$filter=Source eq ${id} or Target eq ${id}`,
         transformResponse: (response: { value: WordTranslation[] }) => response.value,
