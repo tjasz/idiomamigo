@@ -49,10 +49,13 @@ export const api = createApi({
         providesTags: (item) => item ? [{ type: tagType, id: String(item[idFieldName]) }] : []
       });
     }
-    function listOperation<T>(tagType: TagType, idFieldName: keyof (T)) {
-      // TODO support $filter and $orderBy
-      return builder.query<T[], void>({
-        query: () => `rest/${tagType}`,
+    function listOperation<T, InputType>(
+      tagType: TagType,
+      idFieldName: keyof (T),
+      querySuffixBuilder?: (arg: InputType) => string,
+    ) {
+      return builder.query<T[], InputType>({
+        query: (arg: InputType) => `rest/${tagType}${querySuffixBuilder === undefined ? '' : querySuffixBuilder(arg)}`,
         transformResponse: (response: { value: T[] }) => response.value,
         providesTags: (result) => result
           ? [
@@ -86,87 +89,68 @@ export const api = createApi({
       // Language CRUD operations
       createLanguage: createOperation<Language, 'Name'>(TagType.Language),
       getLanguage: getOperation<Language>(TagType.Language, 'Name'),
-      listLanguages: listOperation<Language>(TagType.Language, 'Name'),
+      listLanguages: listOperation<Language, void>(TagType.Language, 'Name'),
       updateLanguage: updateOperation<Language>(TagType.Language, 'Name'),
       deleteLanguage: deleteOperation<Language, string>(TagType.Language, 'Name'),
       // Phrase CRUD operations
       createPhrase: createOperation<Phrase, 'Id'>(TagType.Phrase),
       getPhrase: getOperation<Phrase>(TagType.Phrase, 'Id'),
-      listPhrases: listOperation<Phrase>(TagType.Phrase, 'Id'),
+      listPhrases: listOperation<Phrase, void>(TagType.Phrase, 'Id'),
       updatePhrase: updateOperation<Phrase>(TagType.Phrase, 'Id'),
       deletePhrase: deleteOperation<Phrase, number>(TagType.Phrase, 'Id'),
       // PhraseMembership CRUD operations
       createPhraseMembership: createOperation<PhraseMembership, 'Id'>(TagType.PhraseMembership),
       getPhraseMembership: getOperation<PhraseMembership>(TagType.PhraseMembership, 'Id'),
-      listPhraseMemberships: listOperation<PhraseMembership>(TagType.PhraseMembership, 'Id'),
+      listPhraseMemberships: listOperation<PhraseMembership, void>(TagType.PhraseMembership, 'Id'),
       updatePhraseMembership: updateOperation<PhraseMembership>(TagType.PhraseMembership, 'Id'),
       deletePhraseMembership: deleteOperation<PhraseMembership, number>(TagType.PhraseMembership, 'Id'),
       // PhraseTranslation CRUD operations
       createPhraseTranslation: createOperation<PhraseTranslation, 'Id'>(TagType.PhraseTranslation),
       getPhraseTranslation: getOperation<PhraseTranslation>(TagType.PhraseTranslation, 'Id'),
-      listPhraseTranslations: listOperation<PhraseTranslation>(TagType.PhraseTranslation, 'Id'),
+      listPhraseTranslations: listOperation<PhraseTranslation, void>(TagType.PhraseTranslation, 'Id'),
       updatePhraseTranslation: updateOperation<PhraseTranslation>(TagType.PhraseTranslation, 'Id'),
       deletePhraseTranslation: deleteOperation<PhraseTranslation, number>(TagType.PhraseTranslation, 'Id'),
-      listTranslationsForPhrase: builder.query<PhraseTranslation[], number>({
-        query: (id) => `rest/PhraseTranslation?$filter=Source eq ${id} or Target eq ${id}`,
-        transformResponse: (response: { value: PhraseTranslation[] }) => response.value,
-        providesTags: (result) => result
-          ? [
-            ...result.map<{ type: TagType.PhraseTranslation, id: number }>(phraseTranslation => ({ type: TagType.PhraseTranslation, id: phraseTranslation.Id })),
-            { type: TagType.PhraseTranslation, id: listTagId }
-          ]
-          : [{ type: TagType.PhraseTranslation, id: listTagId }],
-      }),
+      listTranslationsForPhrase: listOperation<PhraseTranslation, number>(
+        TagType.PhraseTranslation,
+        'Id',
+        (id) => `?$filter=Source eq ${id} or Target eq ${id}`
+      ),
       // Tag CRUD operations
       createTag: createOperation<Tag, 'Name'>(TagType.Tag),
       getTag: getOperation<Tag>(TagType.Tag, 'Name'),
-      listTags: listOperation<Tag>(TagType.Tag, 'Name'),
+      listTags: listOperation<Tag, void>(TagType.Tag, 'Name'),
       updateTag: updateOperation<Tag>(TagType.Tag, 'Name'),
       deleteTag: deleteOperation<Tag, string>(TagType.Tag, 'Name'),
       // TagPhraseRelation CRUD operations
       createTagPhraseRelation: createOperation<TagPhraseRelation, 'Id'>(TagType.TagPhraseRelation),
       getTagPhraseRelation: getOperation<TagPhraseRelation>(TagType.TagPhraseRelation, 'Id'),
-      listTagPhraseRelations: listOperation<TagPhraseRelation>(TagType.TagPhraseRelation, 'Id'),
+      listTagPhraseRelations: listOperation<TagPhraseRelation, void>(TagType.TagPhraseRelation, 'Id'),
       updateTagPhraseRelation: updateOperation<TagPhraseRelation>(TagType.TagPhraseRelation, 'Id'),
       deleteTagPhraseRelation: deleteOperation<TagPhraseRelation, number>(TagType.TagPhraseRelation, 'Id'),
       // TagWordRelation CRUD operations
       createTagWordRelation: createOperation<TagWordRelation, 'Id'>(TagType.TagWordRelation),
       getTagWordRelation: getOperation<TagWordRelation>(TagType.TagWordRelation, 'Id'),
-      listTagWordRelations: listOperation<TagWordRelation>(TagType.TagWordRelation, 'Id'),
+      listTagWordRelations: listOperation<TagWordRelation, void>(TagType.TagWordRelation, 'Id'),
       updateTagWordRelation: updateOperation<TagWordRelation>(TagType.TagWordRelation, 'Id'),
       deleteTagWordRelation: deleteOperation<TagWordRelation, number>(TagType.TagWordRelation, 'Id'),
       // Word CRUD operations
       createWord: createOperation<Word, 'Id'>(TagType.Word),
       getWord: getOperation<Word>(TagType.Word, 'Id'),
-      listWords: listOperation<Word>(TagType.Word, 'Id'),
+      listWords: listOperation<Word, void>(TagType.Word, 'Id', () => '?$orderby=Language,Spelling,Creation'),
       updateWord: updateOperation<Word>(TagType.Word, 'Id'),
       deleteWord: deleteOperation<Word, number>(TagType.Word, 'Id'),
-      listWordsWithFilter: builder.query<Word[], string>({
-        query: (filter) => `rest/Word?$filter=${filter}`,
-        transformResponse: (response: { value: Word[] }) => response.value,
-        providesTags: (result) => result
-          ? [
-            ...result.map<{ type: TagType.Word, id: number }>(word => ({ type: TagType.Word, id: word.Id })),
-            { type: TagType.Word, id: listTagId }
-          ]
-          : [{ type: TagType.Word, id: listTagId }],
-      }),
+      listWordsWithFilter: listOperation<Word, string>(TagType.Word, 'Id', (filter) => `?$filter=${filter}`),
       // WordTranslation CRUD operations
       createWordTranslation: createOperation<WordTranslation, 'Id'>(TagType.WordTranslation),
       getWordTranslation: getOperation<WordTranslation>(TagType.WordTranslation, 'Id'),
-      listWordTranslations: listOperation<WordTranslation>(TagType.WordTranslation, 'Id'),
+      listWordTranslations: listOperation<WordTranslation, void>(TagType.WordTranslation, 'Id'),
       updateWordTranslation: updateOperation<WordTranslation>(TagType.WordTranslation, 'Id'),
       deleteWordTranslation: deleteOperation<WordTranslation, number>(TagType.WordTranslation, 'Id'),
-      listTranslationsForWord: builder.query<WordTranslation[], number>({
-        query: (id) => `rest/WordTranslation?$filter=Source eq ${id} or Target eq ${id}`,
-        transformResponse: (response: { value: WordTranslation[] }) => response.value,
-        providesTags: (result) => result
-          ? [
-            ...result.map<{ type: TagType.WordTranslation, id: number }>(wordTranslation => ({ type: TagType.WordTranslation, id: wordTranslation.Id })),
-            { type: TagType.WordTranslation, id: listTagId }
-          ]
-          : [{ type: TagType.WordTranslation, id: listTagId }],
-      }),
+      listTranslationsForWord: listOperation<WordTranslation, number>(
+        TagType.WordTranslation,
+        'Id',
+        (id) => `?$filter=Source eq ${id} or Target eq ${id}`
+      ),
       //
       // More complex graphql queries that follow relations
       //
