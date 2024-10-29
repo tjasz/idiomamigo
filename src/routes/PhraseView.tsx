@@ -1,10 +1,10 @@
-import React, { FC } from "react";
+import React, { FC, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useCreatePhraseMembershipMutation, useCreateWordMutation, useGetPhraseWithWordsAndTagsQuery, useGetTranslationsForPhraseQuery, useListWordsWithFilterQuery } from "../redux-api";
+import { useCreatePhraseMembershipMutation, useCreateTagPhraseRelationMutation, useCreateWordMutation, useGetPhraseWithWordsAndTagsQuery, useGetTranslationsForPhraseQuery, useListTagsQuery, useListWordsWithFilterQuery } from "../redux-api";
 import splitIntoWords from "../text/splitIntoWords";
 import { Phrase, Tag, Word } from "../types";
 import ApiError from "../ApiError";
-import { LinearProgress } from "@mui/material";
+import { CircularProgress, Dialog, DialogTitle, LinearProgress } from "@mui/material";
 
 export function PhraseView() {
   const params = useParams();
@@ -46,7 +46,7 @@ export function PhraseView() {
           </div>
       }
       <WordDetails phrase={phrase} />
-      <TagDetails tags={phrase.Tags} />
+      <TagDetails tags={phrase.Tags} phraseId={phrase.Id} />
     </div>}
   </div>
 }
@@ -118,13 +118,58 @@ const WordDetails: FC<IWordDetailsParams> = ({ phrase }) => {
   </div>
 }
 
-interface ITagDetailsParams { tags: Tag[] };
+interface ITagDetailsParams { tags: Tag[], phraseId: number };
 
-const TagDetails: FC<ITagDetailsParams> = ({ tags }) => {
+const TagDetails: FC<ITagDetailsParams> = ({ tags, phraseId }) => {
+  const [attachTag, { isLoading: isAttaching }] = useCreateTagPhraseRelationMutation();
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   return <div>
     <h2>Tags:</h2>
     <ul>
-      {tags.map(tag => <li key={tag.Name}><Link to={`/Tags/${tag.Name}`}>{tag.Name}</Link></li>)}
+      {tags.map(tag => <li key={tag.Name}>
+        <Link to={`/Tags/${tag.Name}`}>{tag.Name}</Link>
+      </li>)}
     </ul>
+    <button onClick={() => setDialogOpen(true)}>Add</button>
+    <Dialog open={dialogOpen}>
+      <DialogTitle>Attach Tag</DialogTitle>
+      {isAttaching ? <CircularProgress /> : <TagSelector onConfirm={(value: Tag) => {
+        attachTag({
+          Tag: value.Name,
+          Phrase: phraseId,
+          Creation: new Date(),
+        });
+        setDialogOpen(false);
+      }} />}
+    </Dialog>
+  </div>
+}
+
+interface ITagSelectorProps { onConfirm: (value: Tag) => void };
+const TagSelector: FC<ITagSelectorProps> = ({ onConfirm }) => {
+  const { data: tags, isLoading: tagsLoading, error: tagsError } = useListTagsQuery();
+  const [tag, setTag] = useState<Tag | undefined>(undefined);
+
+  if (tagsLoading) {
+    return <LinearProgress />
+  }
+
+  if (tagsError) {
+    return <ApiError error={tagsError} />
+  }
+
+  return <div>
+    <select onChange={event => setTag(tags?.[parseInt(event.target.value)])}>
+      <option value={undefined} disabled selected><em>Select...</em></option>
+      {tags?.map((tag, index) => <option key={index} value={index}>{tag.Name}</option>)}
+    </select>
+    <button onClick={() => {
+      if (tag === undefined) {
+        alert("Tag name must be defined to confirm.")
+      } else {
+        onConfirm(tag)
+      }
+    }}>Confirm</button>
   </div>
 }
