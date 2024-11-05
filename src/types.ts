@@ -30,6 +30,17 @@ export interface PhraseTranslation {
   Creation: Date;
 }
 
+export interface PhraseTranslationView {
+  Id: number;
+  Creation: Date;
+  SourceId: number;
+  SourceLanguage: string;
+  SourceSpelling: string;
+  TargetId: number;
+  TargetLanguage: string;
+  TargetSpelling: string;
+}
+
 export interface Tag {
   Name: string;
 }

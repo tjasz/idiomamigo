@@ -171,6 +171,17 @@
         }
       ]
     },
+    "PhraseTranslationView": {
+      "source": "dbo.PhraseTranslationView",
+      "permissions": [
+        {
+          "actions": [
+            "*"
+          ],
+          "role": "anonymous"
+        }
+      ]
+    },
     "Tag": {
       "source": "dbo.Tag",
       "relationships": {

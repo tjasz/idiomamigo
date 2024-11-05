@@ -1,11 +1,12 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Language, Phrase, PhraseMembership, PhraseTranslation, Tag, TagPhraseRelation, TagWordRelation, Word, WordTranslation, WordTranslationView } from './types';
+import { Language, Phrase, PhraseMembership, PhraseTranslation, PhraseTranslationView, Tag, TagPhraseRelation, TagWordRelation, Word, WordTranslation, WordTranslationView } from './types';
 
 enum TagType {
   Language = 'Language',
   Phrase = 'Phrase',
   PhraseMembership = 'PhraseMembership',
   PhraseTranslation = 'PhraseTranslation',
+  PhraseTranslationView = 'PhraseTranslationView',
   Tag = 'Tag',
   TagPhraseRelation = 'TagPhraseRelation',
   TagWordRelation = 'TagWordRelation',
@@ -18,6 +19,7 @@ const tagTypes = [
   TagType.Phrase,
   TagType.PhraseMembership,
   TagType.PhraseTranslation,
+  TagType.PhraseTranslationView,
   TagType.Tag,
   TagType.TagPhraseRelation,
   TagType.TagWordRelation,
@@ -116,6 +118,14 @@ export const api = createApi({
         TagType.PhraseTranslation,
         'Id',
         (id) => `?$filter=Source eq ${id} or Target eq ${id}`
+      ),
+      // PhraseTranslationView read operation
+      getPhraseTranslationView: getOperation<PhraseTranslationView>(TagType.PhraseTranslationView, 'Id'),
+      listPhraseTranslationViews: listOperation<PhraseTranslationView, void>(TagType.PhraseTranslationView, 'Id'),
+      listTranslationViewsForPhrase: listOperation<PhraseTranslationView, number>(
+        TagType.PhraseTranslationView,
+        'Id',
+        (id) => `?$filter=SourceId eq ${id} or TargetId eq ${id}`
       ),
       // Tag CRUD operations
       createTag: createOperation<Tag, 'Name'>(TagType.Tag),
@@ -297,4 +307,7 @@ export const {
   useGetWordTranslationViewQuery,
   useListWordTranslationViewsQuery,
   useListTranslationViewsForWordQuery,
+  useGetPhraseTranslationViewQuery,
+  useListPhraseTranslationViewsQuery,
+  useListTranslationViewsForPhraseQuery,
 } = api;

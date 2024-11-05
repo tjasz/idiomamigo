@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useCreatePhraseMembershipMutation, useCreateTagPhraseRelationMutation, useCreateWordMutation, useGetPhraseWithWordsAndTagsQuery, useListTranslationsForPhraseQuery, useListWordsWithFilterQuery } from "../redux-api";
+import { useCreatePhraseMembershipMutation, useCreateTagPhraseRelationMutation, useCreateWordMutation, useGetPhraseWithWordsAndTagsQuery, useListTranslationViewsForPhraseQuery, useListWordsWithFilterQuery } from "../redux-api";
 import splitIntoWords from "../text/splitIntoWords";
 import { Phrase, Word } from "../types";
 import ApiError from "../ApiError";
@@ -12,7 +12,7 @@ export function PhraseView() {
   const { Id } = params;
   const IdAsInt = parseInt(Id ?? "0");
   const { data: phrase, error, isLoading } = useGetPhraseWithWordsAndTagsQuery(IdAsInt, { skip: Id === undefined });
-  const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useListTranslationsForPhraseQuery(IdAsInt, { skip: Id === undefined });
+  const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useListTranslationViewsForPhraseQuery(IdAsInt, { skip: Id === undefined });
   const [attachTag, { isLoading: isAttaching }] = useCreateTagPhraseRelationMutation();
 
   if (error) {
@@ -39,9 +39,17 @@ export function PhraseView() {
             <h2>Translations</h2>
             <ul>
               {translations!.map(translation => {
-                const otherPhrase = translation.Source === IdAsInt ? translation.Target : translation.Source;
+                const otherPhrase = translation.SourceId === IdAsInt ? {
+                  Id: translation.TargetId,
+                  Language: translation.TargetLanguage,
+                  Spelling: translation.TargetSpelling,
+                } : {
+                  Id: translation.SourceId,
+                  Language: translation.SourceLanguage,
+                  Spelling: translation.SourceSpelling,
+                };
                 return <li key={translation.Id}>
-                  <Link to={`/Phrases/${otherPhrase}`}>{otherPhrase}</Link>
+                  <Link to={`/Phrases/${otherPhrase.Id}`}><strong>{otherPhrase.Language}: </strong>{otherPhrase.Spelling}</Link>
                 </li>
               })}
             </ul>

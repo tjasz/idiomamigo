@@ -35,7 +35,7 @@ export function WordView() {
                   Spelling: translation.SourceSpelling,
                 };
                 return <li key={translation.Id}>
-                  <Link to={`/Words/${otherWord.Id}`}>{otherWord.Spelling} ({otherWord.Language})</Link>
+                  <Link to={`/Words/${otherWord.Id}`}><strong>{otherWord.Language}: </strong>{otherWord.Spelling}</Link>
                 </li>
               })}
             </ul>
