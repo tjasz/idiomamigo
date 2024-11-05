@@ -85,12 +85,12 @@ const WordDetails: FC<IWordDetailsParams> = ({ phrase }) => {
     <h2>Words</h2>
     <h3>Words connected to Phrase</h3>
     <ul>
-      {phrase.Words.map(word => <li key={word.Id}><Link to={`/Phrases/${word.Id}`}>{word.Spelling}</Link></li>)}
+      {phrase.Words.map(word => <li key={word.Id}><Link to={`/Words/${word.Id}`}>{word.Spelling}</Link></li>)}
     </ul>
     <h3>Words in DB that might be in Phrase</h3>
     <ul>
       {potentialWordsInDb?.map(word => <li key={word.Id}>
-        <Link to={`/Phrases/${word.Id}`}>{word.Spelling}</Link>
+        <Link to={`/Words/${word.Id}`}>{word.Spelling}</Link>
         <button
           disabled={isCreatingPhraseMembership}
           onClick={() => createPhraseMembership({ Word: word.Id, Phrase: phrase.Id, Creation: new Date() })}
