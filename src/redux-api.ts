@@ -164,6 +164,8 @@ export const api = createApi({
         (id) => `?$filter=Source eq ${id} or Target eq ${id}`
       ),
       // WordTranslationView read operation
+      // TODO because it's a view, it provides different tags than these reusable function say it does
+      // E.g. it provides WordTranslation LIST
       getWordTranslationView: getOperation<WordTranslationView>(TagType.WordTranslationView, 'Id'),
       listWordTranslationViews: listOperation<WordTranslationView, void>(TagType.WordTranslationView, 'Id'),
       listTranslationViewsForWord: listOperation<WordTranslationView, number>(
@@ -304,6 +306,7 @@ export const {
   useCreateTagPhraseRelationMutation,
   useDeleteTagPhraseRelationMutation,
   useCreateTagWordRelationMutation,
+  useCreateWordTranslationMutation,
   useGetWordTranslationViewQuery,
   useListWordTranslationViewsQuery,
   useListTranslationViewsForWordQuery,
