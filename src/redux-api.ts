@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Language, Phrase, PhraseMembership, PhraseTranslation, Tag, TagPhraseRelation, TagWordRelation, Word, WordTranslation } from './types';
+import { Language, Phrase, PhraseMembership, PhraseTranslation, Tag, TagPhraseRelation, TagWordRelation, Word, WordTranslation, WordTranslationView } from './types';
 
 enum TagType {
   Language = 'Language',
@@ -11,6 +11,7 @@ enum TagType {
   TagWordRelation = 'TagWordRelation',
   Word = 'Word',
   WordTranslation = 'WordTranslation',
+  WordTranslationView = 'WordTranslationView',
 };
 const tagTypes = [
   TagType.Language,
@@ -22,6 +23,7 @@ const tagTypes = [
   TagType.TagWordRelation,
   TagType.Word,
   TagType.WordTranslation,
+  TagType.WordTranslationView,
 ];
 
 const listTagId = 'LIST';
@@ -150,6 +152,14 @@ export const api = createApi({
         TagType.WordTranslation,
         'Id',
         (id) => `?$filter=Source eq ${id} or Target eq ${id}`
+      ),
+      // WordTranslationView read operation
+      getWordTranslationView: getOperation<WordTranslationView>(TagType.WordTranslationView, 'Id'),
+      listWordTranslationViews: listOperation<WordTranslationView, void>(TagType.WordTranslationView, 'Id'),
+      listTranslationViewsForWord: listOperation<WordTranslationView, number>(
+        TagType.WordTranslationView,
+        'Id',
+        (id) => `?$filter=SourceId eq ${id} or TargetId eq ${id}`
       ),
       //
       // More complex graphql queries that follow relations
@@ -284,4 +294,7 @@ export const {
   useCreateTagPhraseRelationMutation,
   useDeleteTagPhraseRelationMutation,
   useCreateTagWordRelationMutation,
+  useGetWordTranslationViewQuery,
+  useListWordTranslationViewsQuery,
+  useListTranslationViewsForWordQuery,
 } = api;

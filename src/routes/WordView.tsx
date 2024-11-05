@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
-import { useCreateTagWordRelationMutation, useListTranslationsForWordQuery, useGetWordWithPhrasesAndTagsQuery } from "../redux-api";
+import { useCreateTagWordRelationMutation, useListTranslationViewsForWordQuery, useGetWordWithPhrasesAndTagsQuery } from "../redux-api";
 import TagDetails from "../TagDetails";
 
 export function WordView() {
@@ -8,7 +8,7 @@ export function WordView() {
   const { Id } = params;
   const IdAsInt = parseInt(Id ?? "0");
   const { data, error, isLoading } = useGetWordWithPhrasesAndTagsQuery(IdAsInt, { skip: Id === undefined });
-  const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useListTranslationsForWordQuery(IdAsInt, { skip: Id === undefined });
+  const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useListTranslationViewsForWordQuery(IdAsInt, { skip: Id === undefined });
   const [attachTag, { isLoading: isAttaching }] = useCreateTagWordRelationMutation();
 
   return <div>
@@ -25,9 +25,17 @@ export function WordView() {
             <h2>Translations</h2>
             <ul>
               {translations!.map(translation => {
-                const otherWord = translation.Source === IdAsInt ? translation.Target : translation.Source;
+                const otherWord = translation.SourceId === IdAsInt ? {
+                  Id: translation.TargetId,
+                  Language: translation.TargetLanguage,
+                  Spelling: translation.TargetSpelling,
+                } : {
+                  Id: translation.SourceId,
+                  Language: translation.SourceLanguage,
+                  Spelling: translation.SourceSpelling,
+                };
                 return <li key={translation.Id}>
-                  <Link to={`/Words/${otherWord}`}>{otherWord}</Link>
+                  <Link to={`/Words/${otherWord.Id}`}>{otherWord.Spelling} ({otherWord.Language})</Link>
                 </li>
               })}
             </ul>

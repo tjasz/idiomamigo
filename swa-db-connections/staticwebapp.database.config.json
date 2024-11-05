@@ -324,6 +324,17 @@
           "role": "anonymous"
         }
       ]
+    },
+    "WordTranslationView": {
+      "source": "dbo.WordTranslationView",
+      "permissions": [
+        {
+          "actions": [
+            "*"
+          ],
+          "role": "anonymous"
+        }
+      ]
     }
   }
 }

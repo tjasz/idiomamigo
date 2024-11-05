@@ -61,3 +61,14 @@ export interface WordTranslation {
   Target: number;
   Creation: Date;
 }
+
+export interface WordTranslationView {
+  Id: number;
+  Creation: Date;
+  SourceId: number;
+  SourceLanguage: string;
+  SourceSpelling: string;
+  TargetId: number;
+  TargetLanguage: string;
+  TargetSpelling: string;
+}
