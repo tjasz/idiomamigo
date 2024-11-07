@@ -29,8 +29,12 @@ export function PhraseView() {
 
   return <div>
     {phrase && <div>
-      <h1>Phrase: '{phrase.Spelling}' (<Link to={`/Languages/${phrase.Language}`}>{phrase.Language}</Link>)</h1>
-      Created: {phrase.Creation.toLocaleString()}
+      <h1>Phrase</h1>
+      <ul>
+        <li><strong>Language:</strong> <Link to={`/Languages/${phrase.Language}`}>{phrase.Language}</Link></li>
+        <li><strong>Created:</strong> {phrase.Creation.toLocaleString()}</li>
+      </ul>
+      <PhraseSpelling phrase={phrase} />
       {!!translationsError
         ? <span style={{ color: "red" }}>{JSON.stringify(translationsError)}</span>
         : translationsIsLoading
@@ -129,5 +133,27 @@ const WordDetails: FC<IWordDetailsParams> = ({ phrase }) => {
         }}>Create and Link</button>
       </li>)}
     </ul>
+  </div>
+}
+
+interface IPhraseSpellingProps {
+  phrase: Phrase & { Words: Word[] };
+}
+const PhraseSpelling: FC<IPhraseSpellingProps> = ({ phrase }) => {
+  const tokens = splitIntoWords(phrase.Spelling)
+
+  const tokensWithLinks = tokens.map((token, index) => {
+    // TODO use lookup to make this more efficient
+    const word = phrase.Words.find(v => v.Spelling === token)
+    if (word) {
+      return <Link key={index} to={`/Words/${word.Id}`}>{token} </Link>
+    } else {
+      return <React.Fragment key={index}>{token} </React.Fragment>;
+    }
+  });
+
+  return <div>
+    <p>{phrase.Spelling}</p>
+    <p>{tokensWithLinks}</p>
   </div>
 }
