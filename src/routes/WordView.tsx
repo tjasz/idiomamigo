@@ -92,7 +92,7 @@ const TranslationView: FC<TranlationViewProps> = ({ word }: TranlationViewProps)
     >
       <DialogTitle>Add Translation</DialogTitle>
       <DialogContent>
-        {isAddingTranslation
+        {isAddingTranslation || isCreatingWord
           ? <CircularProgress />
           : <div>
             <WordSelector sourceWord={word} disabledWordIds={disabledWordIds} onChange={(value) => {
