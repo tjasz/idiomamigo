@@ -1,10 +1,10 @@
 import React, { FC, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useCreateTagWordRelationMutation, useListTranslationViewsForWordQuery, useGetWordWithPhrasesAndTagsQuery, useCreateWordTranslationMutation, useListWordsWithFilterQuery, useCreateWordMutation } from "../redux-api";
+import { useCreateTagWordRelationMutation, useListTranslationViewsForWordQuery, useGetWordWithPhrasesAndTagsQuery, useCreateWordTranslationMutation, useListWordsWithFilterQuery, useCreateWordMutation, useListLanguagesWithFilterQuery } from "../redux-api";
 import TagDetails from "../TagDetails";
 import ApiError from "../ApiError";
 import { Autocomplete, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, TextField } from "@mui/material";
-import { Word } from "../types";
+import { Language, Word } from "../types";
 
 export function WordView() {
   const params = useParams();
@@ -43,10 +43,12 @@ interface TranlationViewProps {
   word: Word;
 }
 const TranslationView: FC<TranlationViewProps> = ({ word }: TranlationViewProps) => {
-  const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useListTranslationViewsForWordQuery(word.Id);
-  const [otherWord, setOtherWord] = useState<Word | undefined>(undefined);
-  const [addTranslation, { isLoading: isAddingTranslation }] = useCreateWordTranslationMutation();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [otherWord, setOtherWord] = useState<Word | string | undefined>(undefined);
+  const [otherLanguage, setOtherLanguage] = useState<string | undefined>(undefined);
+  const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useListTranslationViewsForWordQuery(word.Id);
+  const [addTranslation, { isLoading: isAddingTranslation }] = useCreateWordTranslationMutation();
+  const [createWord, { isLoading: isCreatingWord }] = useCreateWordMutation();
 
   if (translationsError) {
     return <ApiError error={translationsError} />
@@ -92,16 +94,44 @@ const TranslationView: FC<TranlationViewProps> = ({ word }: TranlationViewProps)
       <DialogContent>
         {isAddingTranslation
           ? <CircularProgress />
-          : <WordSelector sourceWord={word} disabledWordIds={disabledWordIds} onChange={(value: Word | undefined) => {
-            setOtherWord(value);
-          }} />
+          : <div>
+            <WordSelector sourceWord={word} disabledWordIds={disabledWordIds} onChange={(value) => {
+              setOtherWord(value);
+            }} />
+            <LanguageSelector disabledLanguages={new Set<string>([word.Language])} onChange={value => setOtherLanguage(value?.Name)} />
+          </div>
         }
       </DialogContent>
       <DialogActions>
         <Button onClick={() => {
           if (otherWord === undefined) {
             alert("Word must be defined to confirm.")
-          } else {
+          }
+          else if (typeof otherWord === "string") {
+            if (!otherLanguage) {
+              alert("Language must be defined to create a new Word.");
+            } else {
+              // create word and add translation
+              createWord({
+                Spelling: otherWord,
+                Language: otherLanguage,
+                Creation: new Date(),
+              }).then(result => {
+                if (result.error) {
+                  alert(result.error);
+                } else if (result.data) {
+                  addTranslation({
+                    Source: word.Id,
+                    Target: result.data.Id,
+                    Creation: new Date(),
+                  });
+                  setDialogOpen(false);
+                }
+              }
+              )
+            }
+          }
+          else {
             addTranslation({
               Source: word.Id,
               Target: otherWord.Id,
@@ -117,7 +147,7 @@ const TranslationView: FC<TranlationViewProps> = ({ word }: TranlationViewProps)
 
 interface IWordSelectorProps {
   sourceWord: Word,
-  onChange: (value: Word | undefined) => void,
+  onChange: (value: Word | string | undefined) => void,
   disabledWordIds: Set<number>,
 };
 const WordSelector: FC<IWordSelectorProps> = ({ sourceWord, onChange, disabledWordIds }) => {
@@ -140,9 +170,42 @@ const WordSelector: FC<IWordSelectorProps> = ({ sourceWord, onChange, disabledWo
 
   return <div>
     <Autocomplete
+      freeSolo
       options={words}
-      getOptionLabel={option => `${option.Spelling} (${option.Language})`}
+      getOptionLabel={option => typeof option === "string" ? option : `${option.Spelling} (${option.Language})`}
       renderInput={(params) => <TextField {...params} label="Select Word..." />}
+      onChange={(ev, value) => onChange(value ?? undefined)}
+    />
+  </div>
+}
+
+interface ILanguageSelectorProps {
+  onChange: (value: Language | undefined) => void,
+  disabledLanguages: Set<string>,
+};
+const LanguageSelector: FC<ILanguageSelectorProps> = ({ onChange, disabledLanguages }) => {
+  const disabledLanguagesFilter = [...disabledLanguages].map(name => `Name ne '${name}'`).join(" and ");
+  const { data: languages, isLoading: languagesLoading, error: languagesError } = useListLanguagesWithFilterQuery(
+    `${disabledLanguagesFilter.length > 0 ? `${disabledLanguagesFilter}&` : ""}$orderby=Name`
+  );
+
+  if (languagesLoading) {
+    return <LinearProgress />
+  }
+
+  if (languagesError) {
+    return <ApiError error={languagesError} />
+  }
+
+  if (!languages) {
+    return <span style={{ color: "red" }}>Data not defined, even though not loading.</span>;
+  }
+
+  return <div>
+    <Autocomplete
+      options={languages}
+      getOptionLabel={option => option.Name}
+      renderInput={(params) => <TextField {...params} label="Select Language..." />}
       onChange={(ev, value) => onChange(value ?? undefined)}
     />
   </div>

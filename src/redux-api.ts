@@ -96,6 +96,7 @@ export const api = createApi({
       listLanguages: listOperation<Language, void>(TagType.Language, 'Name'),
       updateLanguage: updateOperation<Language>(TagType.Language, 'Name'),
       deleteLanguage: deleteOperation<Language, string>(TagType.Language, 'Name'),
+      listLanguagesWithFilter: listOperation<Language, string>(TagType.Language, 'Name', (filter) => `?$filter=${filter}`),
       // Phrase CRUD operations
       createPhrase: createOperation<Phrase, 'Id'>(TagType.Phrase),
       getPhrase: getOperation<Phrase>(TagType.Phrase, 'Id'),
@@ -282,6 +283,7 @@ export const api = createApi({
 
 export const {
   useListLanguagesQuery,
+  useListLanguagesWithFilterQuery,
   useGetLanguageQuery,
   useGetLanguageWithWordsAndPhrasesQuery,
   useListWordsQuery,
