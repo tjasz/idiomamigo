@@ -3,6 +3,7 @@ import { useCreateWordMutation, useDeleteWordMutation, useListLanguagesQuery, us
 import { Link } from "react-router-dom";
 import ApiError from "../ApiError";
 import { LinearProgress } from "@mui/material";
+import { DataTable } from "../DataTable";
 
 export function WordsView() {
   const { data, error, isLoading } = useListWordsQuery();
@@ -24,6 +25,7 @@ export function WordsView() {
 
   return <div>
     <h1>Words</h1>
+    <DataTable />
     <table>
       <tbody>
         <tr>

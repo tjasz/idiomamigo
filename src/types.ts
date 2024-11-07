@@ -1,3 +1,5 @@
+import { JSONSchema7 } from "json-schema";
+
 export interface Language {
   Name: string;
 }
@@ -64,6 +66,25 @@ export interface Word {
   Language: string;
   Spelling: string;
   Creation: Date;
+}
+
+export const WordSchema: JSONSchema7 = {
+  type: "object",
+  properties: {
+    "Id": {
+      type: "number"
+    },
+    "Language": {
+      type: "string"
+    },
+    "Spelling": {
+      type: "string"
+    },
+    "Creation": {
+      type: "string",
+    }
+  },
+  required: ["Id", "Language", "Spelling", "Creation"]
 }
 
 export interface WordTranslation {

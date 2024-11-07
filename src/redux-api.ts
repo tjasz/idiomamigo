@@ -28,6 +28,14 @@ const tagTypes = [
   TagType.WordTranslationView,
 ];
 
+interface ListQueryParameters {
+  "$select"?: string;
+  "$filter"?: string;
+  "$orderby"?: string;
+  "$first"?: string;
+  "$after"?: string;
+}
+
 const listTagId = 'LIST';
 
 export const api = createApi({
@@ -64,6 +72,20 @@ export const api = createApi({
         providesTags: (result) => result
           ? [
             ...result.map<{ type: TagType, id: string }>(item => ({ type: tagType, id: String(item[idFieldName]) })),
+            { type: tagType, id: listTagId }
+          ]
+          : [{ type: tagType, id: listTagId }],
+      });
+    }
+    function listOperationWithPagination<T>(
+      tagType: TagType,
+      idFieldName: keyof (T),
+    ) {
+      return builder.query<{ value: T[], nextLink: string }, Record<string, string>>({
+        query: (arg) => `rest/${tagType}?${new URLSearchParams(arg).toString()}`,
+        providesTags: (result) => result
+          ? [
+            ...result.value.map<{ type: TagType, id: string }>(item => ({ type: tagType, id: String(item[idFieldName]) })),
             { type: tagType, id: listTagId }
           ]
           : [{ type: tagType, id: listTagId }],
@@ -153,6 +175,7 @@ export const api = createApi({
       updateWord: updateOperation<Word>(TagType.Word, 'Id'),
       deleteWord: deleteOperation<Word, number>(TagType.Word, 'Id'),
       listWordsWithFilter: listOperation<Word, string>(TagType.Word, 'Id', (filter) => `?$filter=${filter}`),
+      listWordsWithPagination: listOperationWithPagination<Word>(TagType.Word, 'Id'),
       // WordTranslation CRUD operations
       createWordTranslation: createOperation<WordTranslation, 'Id'>(TagType.WordTranslation),
       getWordTranslation: getOperation<WordTranslation>(TagType.WordTranslation, 'Id'),
@@ -288,6 +311,7 @@ export const {
   useGetLanguageWithWordsAndPhrasesQuery,
   useListWordsQuery,
   useListWordsWithFilterQuery,
+  useListWordsWithPaginationQuery,
   useGetWordQuery,
   useGetWordWithPhrasesAndTagsQuery,
   useListTranslationsForWordQuery,
