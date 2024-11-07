@@ -5,6 +5,7 @@ import TagDetails from "../TagDetails";
 import ApiError from "../ApiError";
 import { Autocomplete, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, TextField } from "@mui/material";
 import { Language, Word } from "../types";
+import { getDictionaryLink } from "../getDictionaryLink";
 
 export function WordView() {
   const params = useParams();
@@ -21,10 +22,15 @@ export function WordView() {
     return <LinearProgress />;
   }
 
+  const dictionaryLink = !!data ? getDictionaryLink(data) : null;
+
   return <div>
     {data && <div>
       <h1>Word: '{data.Spelling}' (<Link to={`/Languages/${data.Language}`}>{data.Language}</Link>)</h1>
-      Created: {data.Creation.toLocaleString()}
+      <ul>
+        <li>Created: {data.Creation.toLocaleString()}</li>
+        {dictionaryLink ? <li>{dictionaryLink}</li> : null}
+      </ul>
       <TranslationView word={data} />
       <h2>Phrases:</h2>
       <ul>
