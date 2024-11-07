@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useCreateTagWordRelationMutation, useListTranslationViewsForWordQuery, useGetWordWithPhrasesAndTagsQuery, useCreateWordTranslationMutation, useListWordsWithFilterQuery, useCreateWordMutation } from "../redux-api";
 import TagDetails from "../TagDetails";
 import ApiError from "../ApiError";
-import { Autocomplete, CircularProgress, Dialog, DialogTitle, LinearProgress, TextField } from "@mui/material";
+import { Autocomplete, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, TextField } from "@mui/material";
 import { Word } from "../types";
 
 export function WordView() {
@@ -44,7 +44,7 @@ interface TranlationViewProps {
 }
 const TranslationView: FC<TranlationViewProps> = ({ word }: TranlationViewProps) => {
   const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useListTranslationViewsForWordQuery(word.Id);
-  const [addWord, { isLoading: isAddingWord }] = useCreateWordMutation();
+  const [otherWord, setOtherWord] = useState<Word | undefined>(undefined);
   const [addTranslation, { isLoading: isAddingTranslation }] = useCreateWordTranslationMutation();
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -82,34 +82,49 @@ const TranslationView: FC<TranlationViewProps> = ({ word }: TranlationViewProps)
       })}
     </ul>
     <button onClick={() => setDialogOpen(true)}>Add</button>
-    <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
+    <Dialog
+      open={dialogOpen}
+      onClose={() => setDialogOpen(false)}
+      fullWidth
+      maxWidth="xs"
+    >
       <DialogTitle>Add Translation</DialogTitle>
-      {isAddingTranslation || isAddingWord
-        ? <CircularProgress />
-        : <WordSelector sourceWord={word} disabledWordIds={disabledWordIds} onConfirm={(value: Word) => {
-          addTranslation({
-            Source: word.Id,
-            Target: value.Id,
-            Creation: new Date(),
-          });
-          setDialogOpen(false);
-        }} />
-      }
+      <DialogContent>
+        {isAddingTranslation
+          ? <CircularProgress />
+          : <WordSelector sourceWord={word} disabledWordIds={disabledWordIds} onChange={(value: Word | undefined) => {
+            setOtherWord(value);
+          }} />
+        }
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => {
+          if (otherWord === undefined) {
+            alert("Word must be defined to confirm.")
+          } else {
+            addTranslation({
+              Source: word.Id,
+              Target: otherWord.Id,
+              Creation: new Date(),
+            });
+            setDialogOpen(false);
+          }
+        }}>Confirm</Button>
+      </DialogActions>
     </Dialog>
   </div>;
 }
 
 interface IWordSelectorProps {
   sourceWord: Word,
-  onConfirm: (value: Word) => void,
+  onChange: (value: Word | undefined) => void,
   disabledWordIds: Set<number>,
 };
-const WordSelector: FC<IWordSelectorProps> = ({ sourceWord, onConfirm, disabledWordIds }) => {
+const WordSelector: FC<IWordSelectorProps> = ({ sourceWord, onChange, disabledWordIds }) => {
   const disabledIdsFilter = [...disabledWordIds].map(id => `Id ne ${id}`).join(" and ");
   const { data: words, isLoading: wordsLoading, error: wordsError } = useListWordsWithFilterQuery(
     `Language ne '${sourceWord.Language}'${disabledIdsFilter.length > 0 ? ` and ${disabledIdsFilter}` : ""}&$orderby=Spelling`
   );
-  const [word, setWord] = useState<Word | undefined>(undefined);
 
   if (wordsLoading) {
     return <LinearProgress />
@@ -128,14 +143,7 @@ const WordSelector: FC<IWordSelectorProps> = ({ sourceWord, onConfirm, disabledW
       options={words}
       getOptionLabel={option => `${option.Spelling} (${option.Language})`}
       renderInput={(params) => <TextField {...params} label="Select Word..." />}
-      onChange={(ev, value) => setWord(value ?? undefined)}
+      onChange={(ev, value) => onChange(value ?? undefined)}
     />
-    <button onClick={() => {
-      if (word === undefined) {
-        alert("Word must be defined to confirm.")
-      } else {
-        onConfirm(word)
-      }
-    }}>Confirm</button>
   </div>
 }
