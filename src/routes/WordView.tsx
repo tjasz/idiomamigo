@@ -1,9 +1,9 @@
 import React, { FC, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useCreateTagWordRelationMutation, useListTranslationViewsForWordQuery, useGetWordWithPhrasesAndTagsQuery, useCreateWordTranslationMutation, useListWordsWithFilterQuery } from "../redux-api";
+import { useCreateTagWordRelationMutation, useListTranslationViewsForWordQuery, useGetWordWithPhrasesAndTagsQuery, useCreateWordTranslationMutation, useListWordsWithFilterQuery, useCreateWordMutation } from "../redux-api";
 import TagDetails from "../TagDetails";
 import ApiError from "../ApiError";
-import { CircularProgress, Dialog, DialogTitle, LinearProgress } from "@mui/material";
+import { Autocomplete, CircularProgress, Dialog, DialogTitle, LinearProgress, TextField } from "@mui/material";
 import { Word } from "../types";
 
 export function WordView() {
@@ -44,6 +44,7 @@ interface TranlationViewProps {
 }
 const TranslationView: FC<TranlationViewProps> = ({ word }: TranlationViewProps) => {
   const { data: translations, error: translationsError, isLoading: translationsIsLoading } = useListTranslationViewsForWordQuery(word.Id);
+  const [addWord, { isLoading: isAddingWord }] = useCreateWordMutation();
   const [addTranslation, { isLoading: isAddingTranslation }] = useCreateWordTranslationMutation();
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -83,7 +84,7 @@ const TranslationView: FC<TranlationViewProps> = ({ word }: TranlationViewProps)
     <button onClick={() => setDialogOpen(true)}>Add</button>
     <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
       <DialogTitle>Add Translation</DialogTitle>
-      {isAddingTranslation
+      {isAddingTranslation || isAddingWord
         ? <CircularProgress />
         : <WordSelector sourceWord={word} disabledWordIds={disabledWordIds} onConfirm={(value: Word) => {
           addTranslation({
@@ -118,13 +119,17 @@ const WordSelector: FC<IWordSelectorProps> = ({ sourceWord, onConfirm, disabledW
     return <ApiError error={wordsError} />
   }
 
+  if (!words) {
+    return <span style={{ color: "red" }}>Data not defined, even though not loading.</span>;
+  }
+
   return <div>
-    <select onChange={event => setWord(words?.[parseInt(event.target.value)])}>
-      <option value={undefined} disabled selected><em>Select...</em></option>
-      {words?.map((word, index) => <option key={index} value={index} disabled={disabledWordIds.has(word.Id)}>
-        {word.Spelling} ({word.Language})
-      </option>)}
-    </select>
+    <Autocomplete
+      options={words}
+      getOptionLabel={option => `${option.Spelling} (${option.Language})`}
+      renderInput={(params) => <TextField {...params} label="Select Word..." />}
+      onChange={(ev, value) => setWord(value ?? undefined)}
+    />
     <button onClick={() => {
       if (word === undefined) {
         alert("Word must be defined to confirm.")
