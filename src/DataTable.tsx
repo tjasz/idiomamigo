@@ -12,20 +12,36 @@ export interface IDataTableProps {
 export const DataTable: FC<IDataTableProps> = () => {
   const [language, setLanguage] = useState<string | undefined>(undefined);
   const [spelling, setSpelling] = useState<string | undefined>(undefined);
+  const [orderby, setOrderBy] = useState<string[]>(["Language", "Spelling", "Creation"]);
 
   const languageFilter = language ? `Language ge '${language}' and Language le '${language}zzz'` : undefined;
   const spellingFilter = spelling ? `Spelling ge '${spelling}' and Spelling le '${spelling}zzz'` : undefined;
+  const orderByParameter = orderby.join(",");
 
   const { data, error, isLoading } = useListWordsWithParametersQuery(
     (languageFilter || spellingFilter)
       ? {
         $filter: [languageFilter, spellingFilter].filter(f => !!f).join(" and "),
-        $orderby: "Language,Spelling,Creation"
+        $orderby: orderByParameter
       } : {
-        $orderby: "Language,Spelling,Creation"
+        $orderby: orderByParameter
       });
   const [createWord, { isLoading: isCreatingWord }] = useCreateWordMutation();
 
+  function prependToOrderBy(colName: string) {
+    setOrderBy(currentOrderBy => {
+      if (currentOrderBy.length < 1) {
+        return [colName];
+      }
+
+      // if it has no "desc" suffix, add one
+      if (currentOrderBy[0] === colName) {
+        return [`${colName} desc`, ...currentOrderBy.slice(1)]
+      }
+
+      return [colName, ...currentOrderBy.filter(v => !v.startsWith(colName))]
+    });
+  }
 
   if (error) {
     return <ApiError error={error} />
@@ -44,9 +60,9 @@ export const DataTable: FC<IDataTableProps> = () => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>Language</TableCell>
-            <TableCell>Spelling</TableCell>
-            <TableCell>Creation</TableCell>
+            <TableCell onClick={() => prependToOrderBy("Language")}>Language</TableCell>
+            <TableCell onClick={() => prependToOrderBy("Spelling")}>Spelling</TableCell>
+            <TableCell onClick={() => prependToOrderBy("Creation")}>Creation</TableCell>
           </TableRow>
           <TableRow>
             <TableCell>
