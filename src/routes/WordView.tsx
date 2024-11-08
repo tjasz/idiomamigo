@@ -6,6 +6,7 @@ import ApiError from "../ApiError";
 import { Autocomplete, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, TextField } from "@mui/material";
 import { Language, Word } from "../types";
 import { getDictionaryLink } from "../getDictionaryLink";
+import { LanguageSelector } from "../LanguageSelector";
 
 export function WordView() {
   const params = useParams();
@@ -180,38 +181,6 @@ const WordSelector: FC<IWordSelectorProps> = ({ sourceWord, onChange, disabledWo
       options={words}
       getOptionLabel={option => typeof option === "string" ? option : `${option.Spelling} (${option.Language})`}
       renderInput={(params) => <TextField {...params} label="Select Word..." />}
-      onChange={(ev, value) => onChange(value ?? undefined)}
-    />
-  </div>
-}
-
-interface ILanguageSelectorProps {
-  onChange: (value: Language | undefined) => void,
-  disabledLanguages: Set<string>,
-};
-const LanguageSelector: FC<ILanguageSelectorProps> = ({ onChange, disabledLanguages }) => {
-  const disabledLanguagesFilter = [...disabledLanguages].map(name => `Name ne '${name}'`).join(" and ");
-  const { data: languages, isLoading: languagesLoading, error: languagesError } = useListLanguagesWithFilterQuery(
-    `${disabledLanguagesFilter.length > 0 ? `${disabledLanguagesFilter}&` : ""}$orderby=Name`
-  );
-
-  if (languagesLoading) {
-    return <LinearProgress />
-  }
-
-  if (languagesError) {
-    return <ApiError error={languagesError} />
-  }
-
-  if (!languages) {
-    return <span style={{ color: "red" }}>Data not defined, even though not loading.</span>;
-  }
-
-  return <div>
-    <Autocomplete
-      options={languages}
-      getOptionLabel={option => option.Name}
-      renderInput={(params) => <TextField {...params} label="Select Language..." />}
       onChange={(ev, value) => onChange(value ?? undefined)}
     />
   </div>

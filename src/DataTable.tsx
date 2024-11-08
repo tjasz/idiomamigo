@@ -1,9 +1,10 @@
 import { FC, useState } from "react";
-import { useListWordsWithPaginationQuery } from "./redux-api";
+import { useCreateWordMutation, useListWordsWithParametersQuery } from "./redux-api";
 import ApiError from "./ApiError";
-import { LinearProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from "@mui/material";
+import { Button, LinearProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from "@mui/material";
 import React from "react";
 import { Link } from "react-router-dom";
+import { LanguageSelector } from "./LanguageSelector";
 
 export interface IDataTableProps {
 
@@ -15,7 +16,7 @@ export const DataTable: FC<IDataTableProps> = ({ }) => {
   const languageFilter = language ? `Language ge '${language}' and Language le '${language}zzz'` : undefined;
   const spellingFilter = spelling ? `Spelling ge '${spelling}' and Spelling le '${spelling}zzz'` : undefined;
 
-  const { data, error, isLoading } = useListWordsWithPaginationQuery(
+  const { data, error, isLoading } = useListWordsWithParametersQuery(
     (languageFilter || spellingFilter)
       ? {
         $filter: [languageFilter, spellingFilter].filter(f => !!f).join(" and "),
@@ -23,6 +24,8 @@ export const DataTable: FC<IDataTableProps> = ({ }) => {
       } : {
         $orderby: "Language,Spelling,Creation"
       });
+  const [createWord, { isLoading: isCreatingWord }] = useCreateWordMutation();
+
 
   if (error) {
     return <ApiError error={error} />
@@ -47,9 +50,8 @@ export const DataTable: FC<IDataTableProps> = ({ }) => {
           </TableRow>
           <TableRow>
             <TableCell>
-              <TextField
-                label="Language"
-                onChange={(event) => setLanguage(event.target.value)}
+              <LanguageSelector
+                onChange={value => setLanguage(value?.Name)}
               />
             </TableCell>
             <TableCell>
@@ -59,6 +61,23 @@ export const DataTable: FC<IDataTableProps> = ({ }) => {
               />
             </TableCell>
             <TableCell>
+              <Button
+                disabled={isCreatingWord || data.value.length > 0}
+                onClick={() => {
+                  if (language === undefined || spelling === undefined) {
+                    alert("Language and spelling required to create a word.")
+                  } else {
+                    createWord({
+                      Language: language,
+                      Spelling: spelling,
+                      Creation: new Date(),
+                    });
+                    setSpelling(undefined);
+                  }
+                }}
+              >
+                Create
+              </Button>
             </TableCell>
           </TableRow>
         </TableHead>

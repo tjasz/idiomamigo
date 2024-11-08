@@ -77,11 +77,11 @@ export const api = createApi({
           : [{ type: tagType, id: listTagId }],
       });
     }
-    function listOperationWithPagination<T>(
+    function listOperationWithParameters<T>(
       tagType: TagType,
       idFieldName: keyof (T),
     ) {
-      return builder.query<{ value: T[], nextLink: string }, Record<string, string>>({
+      return builder.query<{ value: T[], nextLink: string }, Record<string, string> | undefined>({
         query: (arg) => `rest/${tagType}?${new URLSearchParams(arg).toString()}`,
         providesTags: (result) => result
           ? [
@@ -119,6 +119,7 @@ export const api = createApi({
       updateLanguage: updateOperation<Language>(TagType.Language, 'Name'),
       deleteLanguage: deleteOperation<Language, string>(TagType.Language, 'Name'),
       listLanguagesWithFilter: listOperation<Language, string>(TagType.Language, 'Name', (filter) => `?$filter=${filter}`),
+      listLanguagesWithParameters: listOperationWithParameters<Language>(TagType.Language, 'Name'),
       // Phrase CRUD operations
       createPhrase: createOperation<Phrase, 'Id'>(TagType.Phrase),
       getPhrase: getOperation<Phrase>(TagType.Phrase, 'Id'),
@@ -175,7 +176,7 @@ export const api = createApi({
       updateWord: updateOperation<Word>(TagType.Word, 'Id'),
       deleteWord: deleteOperation<Word, number>(TagType.Word, 'Id'),
       listWordsWithFilter: listOperation<Word, string>(TagType.Word, 'Id', (filter) => `?$filter=${filter}`),
-      listWordsWithPagination: listOperationWithPagination<Word>(TagType.Word, 'Id'),
+      listWordsWithParameters: listOperationWithParameters<Word>(TagType.Word, 'Id'),
       // WordTranslation CRUD operations
       createWordTranslation: createOperation<WordTranslation, 'Id'>(TagType.WordTranslation),
       getWordTranslation: getOperation<WordTranslation>(TagType.WordTranslation, 'Id'),
@@ -307,11 +308,12 @@ export const api = createApi({
 export const {
   useListLanguagesQuery,
   useListLanguagesWithFilterQuery,
+  useListLanguagesWithParametersQuery,
   useGetLanguageQuery,
   useGetLanguageWithWordsAndPhrasesQuery,
   useListWordsQuery,
   useListWordsWithFilterQuery,
-  useListWordsWithPaginationQuery,
+  useListWordsWithParametersQuery,
   useGetWordQuery,
   useGetWordWithPhrasesAndTagsQuery,
   useListTranslationsForWordQuery,
