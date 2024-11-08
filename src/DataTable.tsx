@@ -9,7 +9,7 @@ import { LanguageSelector } from "./LanguageSelector";
 export interface IDataTableProps {
 
 }
-export const DataTable: FC<IDataTableProps> = ({ }) => {
+export const DataTable: FC<IDataTableProps> = () => {
   const [language, setLanguage] = useState<string | undefined>(undefined);
   const [spelling, setSpelling] = useState<string | undefined>(undefined);
 

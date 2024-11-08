@@ -28,14 +28,6 @@ const tagTypes = [
   TagType.WordTranslationView,
 ];
 
-interface ListQueryParameters {
-  "$select"?: string;
-  "$filter"?: string;
-  "$orderby"?: string;
-  "$first"?: string;
-  "$after"?: string;
-}
-
 const listTagId = 'LIST';
 
 export const api = createApi({

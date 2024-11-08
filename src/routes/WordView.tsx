@@ -1,10 +1,10 @@
 import React, { FC, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { useCreateTagWordRelationMutation, useListTranslationViewsForWordQuery, useGetWordWithPhrasesAndTagsQuery, useCreateWordTranslationMutation, useListWordsWithFilterQuery, useCreateWordMutation, useListLanguagesWithFilterQuery } from "../redux-api";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { useCreateTagWordRelationMutation, useListTranslationViewsForWordQuery, useGetWordWithPhrasesAndTagsQuery, useCreateWordTranslationMutation, useListWordsWithFilterQuery, useCreateWordMutation, useDeleteWordMutation } from "../redux-api";
 import TagDetails from "../TagDetails";
 import ApiError from "../ApiError";
 import { Autocomplete, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, TextField } from "@mui/material";
-import { Language, Word } from "../types";
+import { Word } from "../types";
 import { getDictionaryLink } from "../getDictionaryLink";
 import { LanguageSelector } from "../LanguageSelector";
 
@@ -42,6 +42,7 @@ export function WordView() {
         Word: data.Id,
         Creation: new Date(),
       })} />
+      <DeleteWord wordId={data.Id} />
     </div>}
   </div>
 }
@@ -184,4 +185,27 @@ const WordSelector: FC<IWordSelectorProps> = ({ sourceWord, onChange, disabledWo
       onChange={(ev, value) => onChange(value ?? undefined)}
     />
   </div>
+}
+
+interface IDeleteWordProps {
+  wordId: number;
+}
+const DeleteWord: FC<IDeleteWordProps> = ({ wordId }) => {
+  const [deleteWord, { isLoading, error }] = useDeleteWordMutation();
+  const navigate = useNavigate();
+
+  if (error) {
+    return <ApiError error={error} />
+  }
+
+  if (isLoading) {
+    return <LinearProgress />;
+  }
+
+  return <Button onClick={() => {
+    deleteWord(wordId);
+    navigate("..", { relative: "path" })
+  }}>
+    Delete Word
+  </Button>
 }
